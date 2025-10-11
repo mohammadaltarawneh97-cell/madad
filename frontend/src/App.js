@@ -1,34 +1,16 @@
-import React, { useState, useEffect, createContext, useContext } from "react";
-import { BrowserRouter, Routes, Route, Navigate, useNavigate } from "react-router-dom";
-import axios from "axios";
+import React from "react";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import "./App.css";
 
-// Context for authentication
-const AuthContext = createContext();
-
-const useAuth = () => {
-  const context = useContext(AuthContext);
-  if (!context) {
-    throw new Error('useAuth must be used within an AuthProvider');
-  }
-  return context;
-};
-
-// API Configuration
-const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
-const API = `${BACKEND_URL}/api`;
-
-// Configure axios interceptor for auth
-axios.interceptors.request.use(
-  (config) => {
-    const token = localStorage.getItem('token');
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
-    }
-    return config;
-  },
-  (error) => Promise.reject(error)
-);
+// Import multi-company components
+import { 
+  AppProvider, 
+  ProtectedRoute, 
+  DashboardLayout, 
+  Login, 
+  CompanyManagement, 
+  useApp 
+} from "./components/MultiCompanyApp";
 
 // Auth Provider Component
 const AuthProvider = ({ children }) => {
