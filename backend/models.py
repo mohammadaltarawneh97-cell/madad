@@ -80,14 +80,6 @@ class CompanyBaseModel(BaseModel):
     updated_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
 class CostingCenter(CompanyBaseModel):
-    COSTING_CHOICES = [
-        ('SCREENING', 'غربلة'),
-        ('CRUSHING', 'كسارة'),
-        ('HAULING', 'نقل'),
-        ('FEEDING', 'تغذية'),
-        ('WASHING', 'غسيل'),
-        ('OTHER', 'أخرى'),
-    ]
     
     name: str = Field(..., description="Costing center name")
     name_ar: str = Field(..., description="Arabic name")
