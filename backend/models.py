@@ -142,6 +142,10 @@ class UserCreate(BaseModel):
     full_name: str
     password: str
     company_id: Optional[str] = None
+    role: Optional[UserRole] = UserRole.DRIVER
+    phone: Optional[str] = None
+    department: Optional[str] = None
+    employee_id: Optional[str] = None
 
 class UserLogin(BaseModel):
     username: str
