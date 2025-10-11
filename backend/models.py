@@ -66,7 +66,7 @@ ROLE_PERMISSIONS = {
     },
     UserRole.FOREMAN: {
         "users": ["read"],
-        "equipment": ["read", "update"],
+        "equipment": ["create", "read", "update"],
         "production": ["create", "read", "update"],
         "expenses": ["read"],
         "invoices": ["read"],
