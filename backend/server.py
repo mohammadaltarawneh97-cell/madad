@@ -190,7 +190,7 @@ async def switch_company(switch_data: CompanySwitch, user: User = Depends(get_cu
     company_id = switch_data.company_id
     
     # Verify user has access to this company
-    if not user.is_super_admin and company_id not in (user.companies or []) and company_id != user.company_id:
+    if user.role != UserRole.SUPERADMIN and company_id not in (user.companies or []) and company_id != user.company_id:
         raise HTTPException(status_code=403, detail="Access denied to this company")
     
     # Verify company exists
