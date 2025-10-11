@@ -725,7 +725,7 @@ function App() {
           <Route path="/dashboard" element={
             <ProtectedRoute>
               <DashboardLayout>
-                <DashboardStats />
+                <AdvancedDashboard />
               </DashboardLayout>
             </ProtectedRoute>
           } />
