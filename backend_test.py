@@ -41,13 +41,13 @@ class RBACAPITester:
             print(f"❌ {test_name} - FAILED {details}")
     
     def make_request(self, method: str, endpoint: str, data: Optional[Dict] = None, 
-                    expected_status: int = 200) -> tuple[bool, Dict]:
+                    expected_status: int = 200, token: str = None) -> tuple[bool, Dict]:
         """Make HTTP request with error handling"""
         url = f"{self.api_url}/{endpoint}"
         headers = {'Content-Type': 'application/json'}
         
-        if self.token:
-            headers['Authorization'] = f'Bearer {self.token}'
+        if token:
+            headers['Authorization'] = f'Bearer {token}'
         
         try:
             if method == 'GET':
