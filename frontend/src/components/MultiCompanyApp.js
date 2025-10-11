@@ -131,6 +131,8 @@ const AppProvider = ({ children }) => {
     user,
     currentCompany,
     companies,
+    permissions,
+    userRole,
     login,
     register,
     logout,
