@@ -361,6 +361,9 @@ async def create_production(production_data: ProductionCreate, user: User = Depe
 
 @api_router.get("/production", response_model=List[Production])
 async def get_production(user: User = Depends(get_current_user)):
+    if not user.has_permission("production", "read"):
+        raise HTTPException(status_code=403, detail="You don't have permission to view production records")
+    
     if not hasattr(user, 'current_company_id') or not user.current_company_id:
         raise HTTPException(status_code=400, detail="No company context")
     
