@@ -556,15 +556,25 @@ const DashboardLayout = ({ children }) => {
             >
               ☰
             </button>
-            <div className="text-right">
-              <div className="text-sm text-gray-600">
-                مرحباً، {user?.full_name}
-              </div>
-              {currentCompany && (
-                <div className="text-xs text-gray-500">
-                  {currentCompany.name}
+            <div className="flex items-center gap-4">
+              <div className="text-right">
+                <div className="text-sm text-gray-600">
+                  مرحباً، {user?.full_name}
                 </div>
-              )}
+                {currentCompany && (
+                  <div className="text-xs text-gray-500">
+                    {currentCompany.name}
+                  </div>
+                )}
+              </div>
+              <button
+                onClick={handleLogout}
+                className="flex items-center gap-2 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors shadow-sm"
+                title="تسجيل الخروج"
+              >
+                <span>🚪</span>
+                <span className="text-sm font-medium">تسجيل الخروج</span>
+              </button>
             </div>
           </div>
         </header>
