@@ -25,7 +25,7 @@ db = client[os.environ['DB_NAME']]
 # Security setup
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 security = HTTPBearer()
-JWT_SECRET_KEY = os.environ.get('JWT_SECRET_KEY', 'khairat-secret-key')
+JWT_SECRET_KEY = os.environ.get('JWT_SECRET_KEY', 'khairat-operations-jwt-secret-key-2024')
 JWT_ALGORITHM = os.environ.get('JWT_ALGORITHM', 'HS256')
 JWT_EXPIRE_MINUTES = int(os.environ.get('JWT_EXPIRE_MINUTES', 60))
 
