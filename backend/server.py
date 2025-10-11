@@ -117,6 +117,30 @@ def deserialize_datetime(obj, datetime_fields):
                     pass
     return obj
 
+# Permission checking decorator
+def require_permission(resource: str, action: str):
+    """Decorator to check if user has permission for a resource and action"""
+    async def permission_checker(user: User = Depends(get_current_user)):
+        if not user.has_permission(resource, action):
+            raise HTTPException(
+                status_code=403, 
+                detail=f"You don't have permission to {action} {resource}"
+            )
+        return user
+    return permission_checker
+
+# Role checking decorator
+def require_role(allowed_roles: List[str]):
+    """Decorator to check if user has one of the allowed roles"""
+    async def role_checker(user: User = Depends(get_current_user)):
+        if user.role not in allowed_roles and user.role != UserRole.SUPERADMIN:
+            raise HTTPException(
+                status_code=403, 
+                detail=f"Access denied. Required roles: {', '.join(allowed_roles)}"
+            )
+        return user
+    return role_checker
+
 # Company management routes
 @api_router.post("/companies", response_model=Company)
 async def create_company(company_data: CompanyCreate, user: User = Depends(get_current_user)):
