@@ -211,7 +211,7 @@ const InvoiceManagement = () => {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-gray-600 mb-1">فواتير معلقة</p>
-              <p className="text-3xl font-bold text-yellow-600">{getTotalByStatus('PENDING').toLocaleArray()} ر.س</p>
+              <p className="text-3xl font-bold text-yellow-600">{getTotalByStatus('PENDING').toLocaleString()} ر.س</p>
             </div>
             <div className="text-4xl">⏳</div>
           </div>
