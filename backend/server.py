@@ -583,6 +583,225 @@ async def get_dashboard_stats(user: User = Depends(get_current_user)):
         "company_id": company_id
     }
 
+
+# Project Management Routes
+@api_router.post("/projects", response_model=Project)
+async def create_project(project_data: ProjectCreate, user: User = Depends(get_current_user)):
+    if not user.has_permission("projects", "create"):
+        raise HTTPException(status_code=403, detail="You don't have permission to create projects")
+    
+    if not hasattr(user, 'current_company_id') or not user.current_company_id:
+        raise HTTPException(status_code=400, detail="No company context")
+    
+    project_obj = Project(**project_data.model_dump(), company_id=user.current_company_id)
+    doc = project_obj.model_dump()
+    serialize_datetime(doc)
+    
+    await db.projects.insert_one(doc)
+    return project_obj
+
+@api_router.get("/projects", response_model=List[Project])
+async def get_projects(user: User = Depends(get_current_user)):
+    if not user.has_permission("projects", "read"):
+        raise HTTPException(status_code=403, detail="You don't have permission to view projects")
+    
+    if not hasattr(user, 'current_company_id') or not user.current_company_id:
+        raise HTTPException(status_code=400, detail="No company context")
+    
+    projects_list = await db.projects.find(
+        {"company_id": user.current_company_id}, 
+        {"_id": 0}
+    ).to_list(1000)
+    
+    for project in projects_list:
+        deserialize_datetime(project, ['created_at', 'updated_at', 'start_date', 'end_date'])
+    
+    return projects_list
+
+@api_router.get("/projects/{project_id}", response_model=Project)
+async def get_project(project_id: str, user: User = Depends(get_current_user)):
+    if not user.has_permission("projects", "read"):
+        raise HTTPException(status_code=403, detail="You don't have permission to view projects")
+    
+    project_doc = await db.projects.find_one({"id": project_id, "company_id": user.current_company_id}, {"_id": 0})
+    if not project_doc:
+        raise HTTPException(status_code=404, detail="Project not found")
+    
+    deserialize_datetime(project_doc, ['created_at', 'updated_at', 'start_date', 'end_date'])
+    return Project(**project_doc)
+
+@api_router.put("/projects/{project_id}", response_model=Project)
+async def update_project(project_id: str, project_data: dict, user: User = Depends(get_current_user)):
+    if not user.has_permission("projects", "update"):
+        raise HTTPException(status_code=403, detail="You don't have permission to update projects")
+    
+    project_doc = await db.projects.find_one({"id": project_id, "company_id": user.current_company_id}, {"_id": 0})
+    if not project_doc:
+        raise HTTPException(status_code=404, detail="Project not found")
+    
+    project_data['updated_at'] = datetime.now(timezone.utc).isoformat()
+    serialize_datetime(project_data)
+    
+    await db.projects.update_one({"id": project_id}, {"$set": project_data})
+    
+    updated_doc = await db.projects.find_one({"id": project_id}, {"_id": 0})
+    deserialize_datetime(updated_doc, ['created_at', 'updated_at', 'start_date', 'end_date'])
+    return Project(**updated_doc)
+
+# Feasibility Studies Routes
+@api_router.post("/feasibility-studies", response_model=FeasibilityStudy)
+async def create_feasibility_study(study_data: FeasibilityStudyCreate, user: User = Depends(get_current_user)):
+    if not user.has_permission("feasibility_studies", "create"):
+        raise HTTPException(status_code=403, detail="You don't have permission to create feasibility studies")
+    
+    if not hasattr(user, 'current_company_id') or not user.current_company_id:
+        raise HTTPException(status_code=400, detail="No company context")
+    
+    study_obj = FeasibilityStudy(**study_data.model_dump(), company_id=user.current_company_id)
+    doc = study_obj.model_dump()
+    serialize_datetime(doc)
+    
+    await db.feasibility_studies.insert_one(doc)
+    return study_obj
+
+@api_router.get("/feasibility-studies", response_model=List[FeasibilityStudy])
+async def get_feasibility_studies(project_id: Optional[str] = None, user: User = Depends(get_current_user)):
+    if not user.has_permission("feasibility_studies", "read"):
+        raise HTTPException(status_code=403, detail="You don't have permission to view feasibility studies")
+    
+    if not hasattr(user, 'current_company_id') or not user.current_company_id:
+        raise HTTPException(status_code=400, detail="No company context")
+    
+    query = {"company_id": user.current_company_id}
+    if project_id:
+        query["project_id"] = project_id
+    
+    studies_list = await db.feasibility_studies.find(query, {"_id": 0}).to_list(1000)
+    
+    for study in studies_list:
+        deserialize_datetime(study, ['created_at', 'updated_at', 'start_date', 'expected_end_date', 'actual_end_date'])
+    
+    return studies_list
+
+@api_router.get("/feasibility-studies/{study_id}", response_model=FeasibilityStudy)
+async def get_feasibility_study(study_id: str, user: User = Depends(get_current_user)):
+    if not user.has_permission("feasibility_studies", "read"):
+        raise HTTPException(status_code=403, detail="You don't have permission to view feasibility studies")
+    
+    study_doc = await db.feasibility_studies.find_one({"id": study_id, "company_id": user.current_company_id}, {"_id": 0})
+    if not study_doc:
+        raise HTTPException(status_code=404, detail="Feasibility study not found")
+    
+    deserialize_datetime(study_doc, ['created_at', 'updated_at', 'start_date', 'expected_end_date', 'actual_end_date'])
+    return FeasibilityStudy(**study_doc)
+
+# Investment Routes
+@api_router.post("/investments", response_model=Investment)
+async def create_investment(investment_data: InvestmentCreate, user: User = Depends(get_current_user)):
+    if not user.has_permission("investments", "create"):
+        raise HTTPException(status_code=403, detail="You don't have permission to create investments")
+    
+    if not hasattr(user, 'current_company_id') or not user.current_company_id:
+        raise HTTPException(status_code=400, detail="No company context")
+    
+    investment_obj = Investment(**investment_data.model_dump(), company_id=user.current_company_id)
+    doc = investment_obj.model_dump()
+    serialize_datetime(doc)
+    
+    await db.investments.insert_one(doc)
+    return investment_obj
+
+@api_router.get("/investments", response_model=List[Investment])
+async def get_investments(project_id: Optional[str] = None, user: User = Depends(get_current_user)):
+    if not user.has_permission("investments", "read"):
+        raise HTTPException(status_code=403, detail="You don't have permission to view investments")
+    
+    if not hasattr(user, 'current_company_id') or not user.current_company_id:
+        raise HTTPException(status_code=400, detail="No company context")
+    
+    query = {"company_id": user.current_company_id}
+    if project_id:
+        query["project_id"] = project_id
+    
+    investments_list = await db.investments.find(query, {"_id": 0}).to_list(1000)
+    
+    for investment in investments_list:
+        deserialize_datetime(investment, ['created_at', 'updated_at', 'investment_date', 'maturity_date'])
+    
+    return investments_list
+
+# Financial Projections Routes
+@api_router.post("/financial-projections", response_model=FinancialProjection)
+async def create_financial_projection(projection_data: FinancialProjectionCreate, user: User = Depends(get_current_user)):
+    if not user.has_permission("financial_projections", "create"):
+        raise HTTPException(status_code=403, detail="You don't have permission to create financial projections")
+    
+    if not hasattr(user, 'current_company_id') or not user.current_company_id:
+        raise HTTPException(status_code=400, detail="No company context")
+    
+    projection_obj = FinancialProjection(**projection_data.model_dump(), company_id=user.current_company_id)
+    doc = projection_obj.model_dump()
+    serialize_datetime(doc)
+    
+    await db.financial_projections.insert_one(doc)
+    return projection_obj
+
+@api_router.get("/financial-projections", response_model=List[FinancialProjection])
+async def get_financial_projections(project_id: Optional[str] = None, user: User = Depends(get_current_user)):
+    if not user.has_permission("financial_projections", "read"):
+        raise HTTPException(status_code=403, detail="You don't have permission to view financial projections")
+    
+    if not hasattr(user, 'current_company_id') or not user.current_company_id:
+        raise HTTPException(status_code=400, detail="No company context")
+    
+    query = {"company_id": user.current_company_id}
+    if project_id:
+        query["project_id"] = project_id
+    
+    projections_list = await db.financial_projections.find(query, {"_id": 0}).sort("year", 1).to_list(1000)
+    
+    for projection in projections_list:
+        deserialize_datetime(projection, ['created_at', 'updated_at'])
+    
+    return projections_list
+
+# Document Management Routes
+@api_router.post("/documents", response_model=Document)
+async def create_document(document_data: DocumentCreate, user: User = Depends(get_current_user)):
+    if not user.has_permission("documents", "create"):
+        raise HTTPException(status_code=403, detail="You don't have permission to create documents")
+    
+    if not hasattr(user, 'current_company_id') or not user.current_company_id:
+        raise HTTPException(status_code=400, detail="No company context")
+    
+    document_obj = Document(**document_data.model_dump(), company_id=user.current_company_id, uploaded_by=user.username)
+    doc = document_obj.model_dump()
+    serialize_datetime(doc)
+    
+    await db.documents.insert_one(doc)
+    return document_obj
+
+@api_router.get("/documents", response_model=List[Document])
+async def get_documents(project_id: Optional[str] = None, document_type: Optional[str] = None, user: User = Depends(get_current_user)):
+    if not user.has_permission("documents", "read"):
+        raise HTTPException(status_code=403, detail="You don't have permission to view documents")
+    
+    if not hasattr(user, 'current_company_id') or not user.current_company_id:
+        raise HTTPException(status_code=400, detail="No company context")
+    
+    query = {"company_id": user.current_company_id}
+    if project_id:
+        query["project_id"] = project_id
+    if document_type:
+        query["document_type"] = document_type
+    
+    documents_list = await db.documents.find(query, {"_id": 0}).sort("created_at", -1).to_list(1000)
+    
+    for document in documents_list:
+        deserialize_datetime(document, ['created_at', 'updated_at'])
+    
+    return documents_list
+
 # Health check
 @api_router.get("/")
 async def root():
