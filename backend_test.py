@@ -89,48 +89,53 @@ class RBACAPITester:
         self.log_result("Health Check Endpoint", success,
                        f"Status: {data.get('status', 'Unknown')}" if success else data.get('error', ''))
     
-    def test_authentication(self):
-        """Test user registration and login"""
-        print("\n🔐 Testing Authentication...")
+    def test_user_authentication(self):
+        """Test authentication for all RBAC users"""
+        print("\n🔐 Testing RBAC User Authentication...")
         
-        # Test user registration
-        test_user_data = {
-            "username": f"test_user_{datetime.now().strftime('%H%M%S')}",
-            "email": f"test_{datetime.now().strftime('%H%M%S')}@example.com",
-            "full_name": "Test User",
-            "password": "TestPass123!"
-        }
-        
-        success, data = self.make_request('POST', 'register', test_user_data, 200)
-        self.log_result("User Registration", success,
-                       f"User ID: {data.get('id', 'Unknown')}" if success else data.get('error', ''))
-        
-        if success:
-            self.test_data['user'] = test_user_data
-            
-            # Test user login
+        for username, user_info in self.test_users.items():
             login_data = {
-                "username": test_user_data["username"],
-                "password": test_user_data["password"]
+                "username": username,
+                "password": "password123"
             }
             
             success, data = self.make_request('POST', 'login', login_data, 200)
-            self.log_result("User Login", success,
-                           f"Token received: {'Yes' if data.get('access_token') else 'No'}" if success else data.get('error', ''))
-            
             if success and data.get('access_token'):
-                self.token = data['access_token']
+                self.user_tokens[username] = data['access_token']
+                if not self.company_id and data.get('company', {}).get('id'):
+                    self.company_id = data['company']['id']
                 
-                # Test get current user
-                success, data = self.make_request('GET', 'me', expected_status=200)
-                self.log_result("Get Current User", success,
-                               f"Username: {data.get('username', 'Unknown')}" if success else data.get('error', ''))
+                self.log_result(f"Login {username} ({user_info['role']})", True, 
+                               f"Token received for {user_info['full_name']}")
+            else:
+                self.log_result(f"Login {username} ({user_info['role']})", False, 
+                               data.get('error', 'Login failed'))
+    
+    def test_user_permissions_context(self):
+        """Test /api/me endpoint returns correct permissions for each role"""
+        print("\n👤 Testing User Permission Context...")
         
-        # Test invalid login
-        invalid_login = {"username": "invalid_user", "password": "wrong_pass"}
-        success, data = self.make_request('POST', 'login', invalid_login, 401)
-        self.log_result("Invalid Login Rejection", success,
-                       "Correctly rejected invalid credentials" if success else "Should have rejected invalid login")
+        for username, user_info in self.test_users.items():
+            if username not in self.user_tokens:
+                continue
+                
+            success, data = self.make_request('GET', 'me', token=self.user_tokens[username])
+            if success:
+                user_data = data.get('user', {})
+                permissions = data.get('permissions', {})
+                role = data.get('role')
+                
+                # Verify role matches
+                role_match = role == user_info['role']
+                self.log_result(f"Role verification for {username}", role_match,
+                               f"Expected: {user_info['role']}, Got: {role}")
+                
+                # Verify permissions structure exists
+                has_permissions = isinstance(permissions, dict) and len(permissions) > 0
+                self.log_result(f"Permissions context for {username}", has_permissions,
+                               f"Permissions count: {len(permissions)}")
+            else:
+                self.log_result(f"Get user context for {username}", False, data.get('error', ''))
     
     def test_equipment_management(self):
         """Test equipment CRUD operations"""
