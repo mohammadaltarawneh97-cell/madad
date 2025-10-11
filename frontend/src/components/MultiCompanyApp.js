@@ -560,7 +560,7 @@ const DashboardLayout = ({ children }) => {
             >
               ☰
             </button>
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-3">
               <div className="text-right">
                 <div className="text-sm text-gray-600">
                   مرحباً، {user?.full_name}
@@ -571,6 +571,58 @@ const DashboardLayout = ({ children }) => {
                   </div>
                 )}
               </div>
+              
+              {/* Company Switcher - Only show if user has multiple companies */}
+              {companies && companies.length > 1 && (
+                <div className="relative">
+                  <button
+                    onClick={() => setShowCompanySwitcher(!showCompanySwitcher)}
+                    className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors shadow-sm"
+                    title="تغيير الشركة"
+                  >
+                    <span>🏢</span>
+                    <span className="text-sm font-medium">تغيير الشركة</span>
+                  </button>
+                  
+                  {/* Dropdown Menu */}
+                  {showCompanySwitcher && (
+                    <div className="absolute left-0 mt-2 w-80 bg-white rounded-lg shadow-xl border border-gray-200 z-50 max-h-96 overflow-y-auto">
+                      <div className="p-3 border-b border-gray-200 bg-gray-50">
+                        <p className="text-sm font-semibold text-gray-700">اختر الشركة</p>
+                      </div>
+                      <div className="py-2">
+                        {companies.map((company) => (
+                          <button
+                            key={company.id}
+                            onClick={() => handleSwitchCompany(company.id)}
+                            className={`w-full text-right px-4 py-3 hover:bg-blue-50 transition-colors ${
+                              currentCompany?.id === company.id ? 'bg-blue-100 border-r-4 border-blue-600' : ''
+                            }`}
+                          >
+                            <div className="flex items-center justify-between">
+                              <div className="flex-1">
+                                <p className="text-sm font-semibold text-gray-900">
+                                  {company.name}
+                                </p>
+                                {company.name_en && (
+                                  <p className="text-xs text-gray-600">{company.name_en}</p>
+                                )}
+                                {company.city && (
+                                  <p className="text-xs text-gray-500 mt-1">📍 {company.city}</p>
+                                )}
+                              </div>
+                              {currentCompany?.id === company.id && (
+                                <span className="text-green-600 text-lg">✓</span>
+                              )}
+                            </div>
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
+              
               <button
                 onClick={handleLogout}
                 className="flex items-center gap-2 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors shadow-sm"
