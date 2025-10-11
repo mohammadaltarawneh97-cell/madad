@@ -100,6 +100,10 @@ ROLE_PERMISSIONS = {
         "production": ["read"],
         "attendance": ["create", "read"],
         "dashboard": ["read"],
+        "employees": ["read_own"],  # Can only see their own profile
+        "salary": ["read_own"],  # Can only see their own salary
+        "vehicles": ["read_assigned"],  # Can only see assigned vehicle
+        "vehicle_location": ["read", "update"],  # Can update GPS location
     },
     UserRole.GUARD: {
         "attendance": ["create", "read"],
