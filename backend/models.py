@@ -9,6 +9,84 @@ class CompanyStatus(str, Enum):
     SUSPENDED = "SUSPENDED"
     TRIAL = "TRIAL"
 
+class UserRole(str, Enum):
+    SUPERADMIN = "superadmin"      # Platform level admin
+    OWNER = "owner"                # Company owner - full access
+    MANAGER = "manager"            # Operations manager
+    ACCOUNTANT = "accountant"      # Financial operations
+    FOREMAN = "foreman"            # Production supervisor
+    DRIVER = "driver"              # Field worker
+    GUARD = "guard"                # Security personnel
+
+# Role permissions mapping
+ROLE_PERMISSIONS = {
+    UserRole.SUPERADMIN: {
+        "companies": ["create", "read", "update", "delete"],
+        "users": ["create", "read", "update", "delete"],
+        "equipment": ["create", "read", "update", "delete"],
+        "production": ["create", "read", "update", "delete"],
+        "expenses": ["create", "read", "update", "delete"],
+        "invoices": ["create", "read", "update", "delete"],
+        "attendance": ["create", "read", "update", "delete"],
+        "costing_centers": ["create", "read", "update", "delete"],
+        "dashboard": ["read"],
+        "reports": ["read", "export"],
+    },
+    UserRole.OWNER: {
+        "users": ["create", "read", "update", "delete"],
+        "equipment": ["create", "read", "update", "delete"],
+        "production": ["create", "read", "update", "delete"],
+        "expenses": ["create", "read", "update", "delete"],
+        "invoices": ["create", "read", "update", "delete"],
+        "attendance": ["create", "read", "update", "delete"],
+        "costing_centers": ["create", "read", "update", "delete"],
+        "dashboard": ["read"],
+        "reports": ["read", "export"],
+    },
+    UserRole.MANAGER: {
+        "users": ["read"],
+        "equipment": ["create", "read", "update"],
+        "production": ["create", "read", "update"],
+        "expenses": ["read"],
+        "invoices": ["read"],
+        "attendance": ["create", "read", "update"],
+        "costing_centers": ["read"],
+        "dashboard": ["read"],
+        "reports": ["read", "export"],
+    },
+    UserRole.ACCOUNTANT: {
+        "users": ["read"],
+        "equipment": ["read"],
+        "production": ["read"],
+        "expenses": ["create", "read", "update", "delete"],
+        "invoices": ["create", "read", "update", "delete"],
+        "attendance": ["read"],
+        "costing_centers": ["read"],
+        "dashboard": ["read"],
+        "reports": ["read", "export"],
+    },
+    UserRole.FOREMAN: {
+        "users": ["read"],
+        "equipment": ["read", "update"],
+        "production": ["create", "read", "update"],
+        "expenses": ["read"],
+        "invoices": ["read"],
+        "attendance": ["create", "read", "update"],
+        "costing_centers": ["read"],
+        "dashboard": ["read"],
+        "reports": ["read"],
+    },
+    UserRole.DRIVER: {
+        "equipment": ["read"],
+        "production": ["read"],
+        "attendance": ["create", "read"],
+        "dashboard": ["read"],
+    },
+    UserRole.GUARD: {
+        "attendance": ["create", "read"],
+    },
+}
+
 class Company(BaseModel):
     model_config = ConfigDict(extra="ignore")
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
