@@ -585,7 +585,7 @@ const DashboardLayout = ({ children }) => {
               
               {/* Company Switcher - Only show if user has multiple companies */}
               {companies && companies.length > 1 && (
-                <div className="relative">
+                <div className="relative company-switcher-container">
                   <button
                     onClick={() => setShowCompanySwitcher(!showCompanySwitcher)}
                     className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors shadow-sm"
