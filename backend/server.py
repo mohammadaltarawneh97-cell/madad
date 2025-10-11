@@ -437,6 +437,9 @@ async def create_invoice(invoice_data: InvoiceCreate, user: User = Depends(get_c
 
 @api_router.get("/invoices", response_model=List[Invoice])
 async def get_invoices(user: User = Depends(get_current_user)):
+    if not user.has_permission("invoices", "read"):
+        raise HTTPException(status_code=403, detail="You don't have permission to view invoices")
+    
     if not hasattr(user, 'current_company_id') or not user.current_company_id:
         raise HTTPException(status_code=400, detail="No company context")
     
