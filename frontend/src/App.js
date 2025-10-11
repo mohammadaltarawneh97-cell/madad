@@ -736,28 +736,28 @@ function App() {
           <Route path="/production" element={
             <ProtectedRoute>
               <DashboardLayout>
-                <ProductionPage />
+                <ProductionManagement />
               </DashboardLayout>
             </ProtectedRoute>
           } />
           <Route path="/expenses" element={
             <ProtectedRoute>
               <DashboardLayout>
-                <ExpensesPage />
+                <ExpenseManagement />
               </DashboardLayout>
             </ProtectedRoute>
           } />
           <Route path="/invoices" element={
             <ProtectedRoute>
               <DashboardLayout>
-                <InvoicesPage />
+                <InvoiceManagement />
               </DashboardLayout>
             </ProtectedRoute>
           } />
           <Route path="/attendance" element={
             <ProtectedRoute>
               <DashboardLayout>
-                <AttendancePage />
+                <AttendanceManagement />
               </DashboardLayout>
             </ProtectedRoute>
           } />
