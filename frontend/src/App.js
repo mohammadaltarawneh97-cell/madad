@@ -361,6 +361,9 @@ const DashboardLayout = ({ children }) => {
   );
 };
 
+// Import Advanced Dashboard
+import AdvancedDashboard from './components/AdvancedDashboard';
+
 // Dashboard Stats Component
 const DashboardStats = () => {
   const [stats, setStats] = useState(null);
