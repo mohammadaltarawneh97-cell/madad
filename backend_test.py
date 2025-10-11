@@ -194,35 +194,62 @@ class RBACAPITester:
             self.log_result(f"Equipment POST Denied - {username} ({self.test_users[username]['role']})", 
                            success, "✓ Correctly denied access" if success else f"✗ Should be denied: {data.get('error', '')}")
     
-    def test_production_management(self):
-        """Test production CRUD operations"""
-        print("\n⚡ Testing Production Management...")
+    def test_production_permissions(self):
+        """Test production endpoint permissions for all roles"""
+        print("\n⚡ Testing Production Permissions...")
         
-        if not self.token:
-            self.log_result("Production Tests", False, "No authentication token available")
-            return
-        
-        # Test create production record
+        # Production test data
         production_data = {
             "date": datetime.now(timezone.utc).isoformat(),
             "activity_type": "SCREENING",
             "actual_qty": 850.0,
             "contract_qty": 1000.0,
-            "equipment_ids": [self.test_data.get('equipment_id', '')],
-            "notes": "Good production day"
+            "equipment_ids": [],
+            "notes": "Test production record"
         }
         
-        success, data = self.make_request('POST', 'production', production_data, 200)
-        self.log_result("Create Production Record", success,
-                       f"Completion Rate: {data.get('completion_rate', 'Unknown')}%" if success else data.get('error', ''))
+        # Expected permissions
+        expected_get_success = ["owner_ali", "manager_mohammad", "accountant_fatima", "foreman_ahmed", "driver_khalid"]
+        expected_get_fail = ["guard_omar"]
+        expected_post_success = ["owner_ali", "manager_mohammad", "foreman_ahmed"]
+        expected_post_fail = ["accountant_fatima", "driver_khalid", "guard_omar"]
         
-        if success:
-            self.test_data['production_id'] = data.get('id')
+        # Test GET /api/production
+        for username in self.test_users.keys():
+            if username not in self.user_tokens:
+                continue
+                
+            success, data = self.make_request('GET', 'production', token=self.user_tokens[username])
             
-            # Test get all production records
-            success, data = self.make_request('GET', 'production')
-            self.log_result("Get All Production Records", success,
-                           f"Count: {len(data) if isinstance(data, list) else 'Unknown'}" if success else data.get('error', ''))
+            if username in expected_get_success:
+                expected_status = success
+                result_msg = f"✓ Allowed access" if success else f"✗ Should have access: {data.get('error', '')}"
+            else:
+                expected_status = not success
+                result_msg = f"✓ Correctly denied access" if not success else f"✗ Should be denied access"
+            
+            self.log_result(f"Production GET - {username} ({self.test_users[username]['role']})", 
+                           expected_status, result_msg)
+        
+        # Test POST /api/production (users who should succeed)
+        for username in expected_post_success:
+            if username not in self.user_tokens:
+                continue
+                
+            success, data = self.make_request('POST', 'production', production_data, 
+                                            token=self.user_tokens[username])
+            self.log_result(f"Production POST - {username} ({self.test_users[username]['role']})", 
+                           success, f"Created production: {data.get('id', 'Unknown')}" if success else data.get('error', ''))
+        
+        # Test POST /api/production (users who should fail)
+        for username in expected_post_fail:
+            if username not in self.user_tokens:
+                continue
+                
+            success, data = self.make_request('POST', 'production', production_data, 
+                                            expected_status=403, token=self.user_tokens[username])
+            self.log_result(f"Production POST Denied - {username} ({self.test_users[username]['role']})", 
+                           success, "✓ Correctly denied access" if success else f"✗ Should be denied: {data.get('error', '')}")
     
     def test_expense_management(self):
         """Test expense CRUD operations"""
