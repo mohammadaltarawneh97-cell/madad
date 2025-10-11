@@ -293,7 +293,14 @@ async def login_user(login_data: UserLogin):
 
 @api_router.get("/me")
 async def get_current_user_info(user: User = Depends(get_current_user), company: Company = Depends(get_user_company)):
-    return {"user": user, "company": company}
+    # Get user permissions based on role
+    permissions = ROLE_PERMISSIONS.get(user.role, {})
+    return {
+        "user": user, 
+        "company": company,
+        "permissions": permissions,
+        "role": user.role
+    }
 
 # Equipment routes (company-specific)
 @api_router.post("/equipment", response_model=Equipment)
