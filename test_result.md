@@ -156,15 +156,18 @@ backend:
 
   - task: "User Role Management"
     implemented: true
-    working: true
-    file: "backend/server.py"
-    stuck_count: 0
+    working: false
+    file: "backend/models.py"
+    stuck_count: 1
     priority: "high"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
       - working: true
         agent: "main"
         comment: "Fixed is_super_admin references to use role-based system. Updated company management endpoints."
+      - working: false
+        agent: "testing"
+        comment: "RBAC permission matrix has 3 bugs in models.py ROLE_PERMISSIONS: 1) Line 59: Accountant should NOT have equipment read access, 2) Line 70: Foreman needs equipment create permission added, 3) Line 63: Accountant needs attendance create permission added. Authentication and JWT context working perfectly for all 6 test users."
 
   - task: "Test User Seeding"
     implemented: true
