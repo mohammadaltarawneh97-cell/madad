@@ -1,0 +1,281 @@
+from pydantic import BaseModel, Field, ConfigDict
+from typing import List, Optional, Dict, Any
+import uuid
+from datetime import datetime, timezone
+from enum import Enum
+
+class CompanyStatus(str, Enum):
+    ACTIVE = "ACTIVE"
+    SUSPENDED = "SUSPENDED"
+    TRIAL = "TRIAL"
+
+class Company(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    name: str = Field(..., description="Company name in Arabic")
+    name_en: Optional[str] = Field(None, description="Company name in English")
+    commercial_register: Optional[str] = Field(None, description="Commercial registration number")
+    tax_number: Optional[str] = Field(None, description="Tax identification number")
+    phone: Optional[str] = None
+    email: Optional[str] = None
+    address: Optional[str] = None
+    city: Optional[str] = None
+    country: str = Field(default="Saudi Arabia")
+    logo_url: Optional[str] = None
+    primary_color: str = Field(default="#2563eb")
+    secondary_color: str = Field(default="#f3f4f6")
+    status: CompanyStatus = Field(default=CompanyStatus.TRIAL)
+    subscription_plan: str = Field(default="basic")
+    max_users: int = Field(default=5)
+    max_equipment: int = Field(default=10)
+    features: List[str] = Field(default_factory=lambda: ["equipment", "production", "expenses", "invoices"])
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    updated_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
+class User(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    username: str
+    email: str
+    full_name: str
+    company_id: Optional[str] = None  # Main company association
+    companies: List[str] = Field(default_factory=list)  # Multiple company access
+    role: str = Field(default="user")  # admin, manager, accountant, foreman, user
+    is_super_admin: bool = Field(default=False)  # Platform super admin
+    is_company_admin: bool = Field(default=False)  # Company admin
+    is_active: bool = True
+    last_login: Optional[datetime] = None
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
+class UserCreate(BaseModel):
+    username: str
+    email: str
+    full_name: str
+    password: str
+    company_id: Optional[str] = None
+
+class UserLogin(BaseModel):
+    username: str
+    password: str
+
+class CompanyCreate(BaseModel):
+    name: str
+    name_en: Optional[str] = None
+    commercial_register: Optional[str] = None
+    tax_number: Optional[str] = None
+    phone: Optional[str] = None
+    email: Optional[str] = None
+    address: Optional[str] = None
+    city: Optional[str] = None
+
+class CompanySwitch(BaseModel):
+    company_id: str
+
+# Base model for company-specific entities
+class CompanyBaseModel(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    company_id: str = Field(..., description="Company ID this record belongs to")
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    updated_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
+class CostingCenter(CompanyBaseModel):
+    COSTING_CHOICES = [
+        ('SCREENING', 'غربلة'),
+        ('CRUSHING', 'كسارة'),
+        ('HAULING', 'نقل'),
+        ('FEEDING', 'تغذية'),
+        ('WASHING', 'غسيل'),
+        ('OTHER', 'أخرى'),
+    ]
+    
+    name: str = Field(..., description="Costing center name")
+    name_ar: str = Field(..., description="Arabic name")
+    description: Optional[str] = None
+    is_active: bool = True
+
+class CostingCenterCreate(BaseModel):
+    name: str
+    name_ar: str
+    description: Optional[str] = None
+
+class Equipment(CompanyBaseModel):
+    EQUIPMENT_TYPES = [
+        ('DT', 'شاحنة قلاب'),
+        ('PC', 'حفارة'),
+        ('WL', 'محمل'),
+        ('GR', 'جريدر'),
+        ('RL', 'رولر'),
+        ('PLANT', 'معدات المصنع'),
+    ]
+    
+    name: str
+    type: str
+    model: str
+    serial_number: Optional[str] = None
+    hours_operated: float = 0.0
+    maintenance_notes: Optional[str] = None
+    purchase_date: Optional[datetime] = None
+    purchase_price: Optional[float] = None
+    current_value: Optional[float] = None
+    is_active: bool = True
+
+class EquipmentCreate(BaseModel):
+    name: str
+    type: str
+    model: str
+    serial_number: Optional[str] = None
+    hours_operated: float = 0.0
+    maintenance_notes: Optional[str] = None
+    purchase_date: Optional[datetime] = None
+    purchase_price: Optional[float] = None
+
+class Production(CompanyBaseModel):
+    date: datetime
+    activity_type: str
+    actual_qty: float
+    contract_qty: float
+    completion_rate: float = Field(default=0.0)
+    equipment_ids: List[str] = []
+    supervisor: Optional[str] = None
+    shift: Optional[str] = None
+    notes: Optional[str] = None
+
+class ProductionCreate(BaseModel):
+    date: datetime
+    activity_type: str
+    actual_qty: float
+    contract_qty: float
+    equipment_ids: List[str] = []
+    supervisor: Optional[str] = None
+    shift: Optional[str] = None
+    notes: Optional[str] = None
+
+class Expense(CompanyBaseModel):
+    EXPENSE_CATEGORIES = [
+        ('FUEL', 'وقود'),
+        ('MAINTENANCE', 'صيانة'),
+        ('LABOR', 'عمالة'),
+        ('MATERIALS', 'مواد'),
+        ('ADMIN', 'إدارية'),
+        ('OTHER', 'أخرى'),
+    ]
+    
+    date: datetime
+    category: str
+    subcategory: Optional[str] = None
+    amount: float
+    description: str
+    equipment_id: Optional[str] = None
+    costing_center_id: Optional[str] = None
+    receipt_number: Optional[str] = None
+    supplier: Optional[str] = None
+    approved_by: Optional[str] = None
+
+class ExpenseCreate(BaseModel):
+    date: datetime
+    category: str
+    subcategory: Optional[str] = None
+    amount: float
+    description: str
+    equipment_id: Optional[str] = None
+    costing_center_id: Optional[str] = None
+    receipt_number: Optional[str] = None
+    supplier: Optional[str] = None
+
+class Invoice(CompanyBaseModel):
+    INVOICE_TYPES = [
+        ('SCREENING', 'غربلة'),
+        ('CRUSHING', 'كسارة'),
+        ('HAULING', 'نقل'),
+        ('FEEDING', 'تغذية'),
+        ('WASHING', 'غسيل'),
+        ('OTHER', 'أخرى'),
+    ]
+    
+    STATUS_CHOICES = [
+        ('DRAFT', 'مسودة'),
+        ('SENT', 'مرسلة'),
+        ('PAID', 'مدفوعة'),
+        ('OVERDUE', 'متأخرة'),
+        ('CANCELLED', 'ملغاة'),
+    ]
+    
+    date: datetime
+    invoice_number: str
+    type: str
+    client_name: str
+    client_contact: Optional[str] = None
+    amount: float
+    quantity: Optional[float] = None
+    unit_price: Optional[float] = None
+    vat_amount: Optional[float] = None
+    total_amount: Optional[float] = None
+    status: str = "DRAFT"
+    due_date: Optional[datetime] = None
+    payment_date: Optional[datetime] = None
+    notes: Optional[str] = None
+
+class InvoiceCreate(BaseModel):
+    date: datetime
+    invoice_number: str
+    type: str
+    client_name: str
+    client_contact: Optional[str] = None
+    amount: float
+    quantity: Optional[float] = None
+    unit_price: Optional[float] = None
+    status: str = "DRAFT"
+    due_date: Optional[datetime] = None
+    notes: Optional[str] = None
+
+class Attendance(CompanyBaseModel):
+    employee_name: str
+    employee_id: Optional[str] = None
+    department: Optional[str] = None
+    date: datetime
+    check_in: Optional[datetime] = None
+    check_out: Optional[datetime] = None
+    hours_worked: Optional[float] = None
+    overtime_hours: Optional[float] = None
+    break_hours: Optional[float] = None
+    notes: Optional[str] = None
+
+class AttendanceCreate(BaseModel):
+    employee_name: str
+    employee_id: Optional[str] = None
+    department: Optional[str] = None
+    date: datetime
+    check_in: Optional[datetime] = None
+    check_out: Optional[datetime] = None
+    hours_worked: Optional[float] = None
+    overtime_hours: Optional[float] = None
+    break_hours: Optional[float] = None
+    notes: Optional[str] = None
+
+class License(CompanyBaseModel):
+    name: str
+    license_number: str
+    issuing_authority: str
+    issue_date: datetime
+    expiry_date: datetime
+    license_type: str
+    file_url: Optional[str] = None
+    notes: Optional[str] = None
+    is_active: bool = True
+
+class LicenseCreate(BaseModel):
+    name: str
+    license_number: str
+    issuing_authority: str
+    issue_date: datetime
+    expiry_date: datetime
+    license_type: str
+    notes: Optional[str] = None
+
+class Token(BaseModel):
+    access_token: str
+    token_type: str
+    expires_in: int
+    user: User
+    company: Optional[Company] = None
