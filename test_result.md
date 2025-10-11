@@ -141,7 +141,7 @@ backend:
 
   - task: "Protected API Endpoints"
     implemented: true
-    working: false
+    working: true
     file: "backend/server.py"
     stuck_count: 1
     priority: "high"
@@ -153,10 +153,13 @@ backend:
       - working: false
         agent: "testing"
         comment: "RBAC Testing Results (96.7% success rate): Found 3 critical permission issues: 1) Accountant has equipment read access when should be denied, 2) Foreman missing equipment create permission, 3) Accountant missing attendance create permission. All other permissions working correctly including proper 403 denials."
+      - working: true
+        agent: "testing"
+        comment: "RBAC Permission Re-verification PASSED (3/3 tests): All 3 permission fixes verified successfully: 1) Equipment GET - Accountant correctly denied (403), 2) Equipment POST - Foreman create successful (200), 3) Attendance POST - Accountant create successful (200). All permission matrix bugs have been resolved."
 
   - task: "User Role Management"
     implemented: true
-    working: false
+    working: true
     file: "backend/models.py"
     stuck_count: 1
     priority: "high"
@@ -168,6 +171,9 @@ backend:
       - working: false
         agent: "testing"
         comment: "RBAC permission matrix has 3 bugs in models.py ROLE_PERMISSIONS: 1) Line 59: Accountant should NOT have equipment read access, 2) Line 70: Foreman needs equipment create permission added, 3) Line 63: Accountant needs attendance create permission added. Authentication and JWT context working perfectly for all 6 test users."
+      - working: true
+        agent: "testing"
+        comment: "RBAC Permission Matrix FIXED: Re-verified all 3 permission fixes in ROLE_PERMISSIONS. Accountant no longer has equipment read access (correctly returns 403), Foreman now has equipment create permission (successfully creates equipment), Accountant now has attendance create permission (successfully creates attendance records). All permission bugs resolved."
 
   - task: "Test User Seeding"
     implemented: true
