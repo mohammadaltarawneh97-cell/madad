@@ -832,7 +832,7 @@ logger = logging.getLogger(__name__)
 
 @app.on_event("shutdown")
 async def shutdown_db_client():
-
+    pass
 
 # HR Management Routes
 @api_router.post("/employees", response_model=Employee)
