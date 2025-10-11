@@ -137,55 +137,62 @@ class RBACAPITester:
             else:
                 self.log_result(f"Get user context for {username}", False, data.get('error', ''))
     
-    def test_equipment_management(self):
-        """Test equipment CRUD operations"""
-        print("\n🚛 Testing Equipment Management...")
+    def test_equipment_permissions(self):
+        """Test equipment endpoint permissions for all roles"""
+        print("\n🚛 Testing Equipment Permissions...")
         
-        if not self.token:
-            self.log_result("Equipment Tests", False, "No authentication token available")
-            return
-        
-        # Test create equipment
+        # Equipment test data
         equipment_data = {
-            "name": "Test Dump Truck 1",
-            "type": "DT",
-            "model": "CAT 777D",
-            "serial_number": "DT001",
+            "name": "Test Excavator CAT 320D",
+            "type": "EX",
+            "model": "CAT 320D",
+            "serial_number": "EX001",
             "hours_operated": 1250.5,
             "maintenance_notes": "Regular maintenance required"
         }
         
-        success, data = self.make_request('POST', 'equipment', equipment_data, 200)
-        self.log_result("Create Equipment", success,
-                       f"Equipment ID: {data.get('id', 'Unknown')}" if success else data.get('error', ''))
+        # Expected permissions based on ROLE_PERMISSIONS
+        expected_get_success = ["owner_ali", "manager_mohammad", "foreman_ahmed", "driver_khalid"]
+        expected_get_fail = ["accountant_fatima", "guard_omar"]
+        expected_post_success = ["owner_ali", "manager_mohammad", "foreman_ahmed"]
+        expected_post_fail = ["accountant_fatima", "driver_khalid", "guard_omar"]
         
-        if success:
-            equipment_id = data.get('id')
-            self.test_data['equipment_id'] = equipment_id
+        # Test GET /api/equipment
+        for username in self.test_users.keys():
+            if username not in self.user_tokens:
+                continue
+                
+            success, data = self.make_request('GET', 'equipment', token=self.user_tokens[username])
             
-            # Test get all equipment
-            success, data = self.make_request('GET', 'equipment')
-            self.log_result("Get All Equipment", success,
-                           f"Count: {len(data) if isinstance(data, list) else 'Unknown'}" if success else data.get('error', ''))
+            if username in expected_get_success:
+                expected_status = success
+                result_msg = f"✓ Allowed access" if success else f"✗ Should have access but got: {data.get('error', '')}"
+            else:
+                expected_status = not success
+                result_msg = f"✓ Correctly denied access" if not success else f"✗ Should be denied access"
             
-            # Test get equipment by ID
-            success, data = self.make_request('GET', f'equipment/{equipment_id}')
-            self.log_result("Get Equipment by ID", success,
-                           f"Name: {data.get('name', 'Unknown')}" if success else data.get('error', ''))
-            
-            # Test update equipment
-            update_data = {
-                "name": "Updated Test Dump Truck 1",
-                "type": "DT",
-                "model": "CAT 777D",
-                "serial_number": "DT001",
-                "hours_operated": 1300.0,
-                "maintenance_notes": "Updated maintenance notes"
-            }
-            
-            success, data = self.make_request('PUT', f'equipment/{equipment_id}', update_data)
-            self.log_result("Update Equipment", success,
-                           f"Updated name: {data.get('name', 'Unknown')}" if success else data.get('error', ''))
+            self.log_result(f"Equipment GET - {username} ({self.test_users[username]['role']})", 
+                           expected_status, result_msg)
+        
+        # Test POST /api/equipment (only test with users who should succeed)
+        for username in expected_post_success:
+            if username not in self.user_tokens:
+                continue
+                
+            success, data = self.make_request('POST', 'equipment', equipment_data, 
+                                            token=self.user_tokens[username])
+            self.log_result(f"Equipment POST - {username} ({self.test_users[username]['role']})", 
+                           success, f"Created equipment: {data.get('id', 'Unknown')}" if success else data.get('error', ''))
+        
+        # Test POST /api/equipment (test users who should fail)
+        for username in expected_post_fail:
+            if username not in self.user_tokens:
+                continue
+                
+            success, data = self.make_request('POST', 'equipment', equipment_data, 
+                                            expected_status=403, token=self.user_tokens[username])
+            self.log_result(f"Equipment POST Denied - {username} ({self.test_users[username]['role']})", 
+                           success, "✓ Correctly denied access" if success else f"✗ Should be denied: {data.get('error', '')}")
     
     def test_production_management(self):
         """Test production CRUD operations"""
