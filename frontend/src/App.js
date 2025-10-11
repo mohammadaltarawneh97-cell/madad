@@ -346,6 +346,12 @@ const DashboardLayout = ({ children }) => {
 // Import Advanced Dashboard
 import AdvancedDashboard from './components/AdvancedDashboard';
 
+// Import comprehensive management components
+import ProductionManagement from './components/ProductionManagement';
+import ExpenseManagement from './components/ExpenseManagement';
+import InvoiceManagement from './components/InvoiceManagement';
+import AttendanceManagement from './components/AttendanceManagement';
+
 // Dashboard Stats Component
 const DashboardStats = () => {
   const [stats, setStats] = useState(null);
