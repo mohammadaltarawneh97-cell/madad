@@ -705,38 +705,11 @@ const EquipmentManagement = () => {
   );
 };
 
-// Simple placeholder components for other pages
-const ProductionPage = () => (
-  <div className="text-center py-12">
-    <div className="text-6xl mb-4">⚡</div>
-    <h2 className="text-2xl font-semibold text-gray-900 mb-2">صفحة الإنتاج</h2>
-    <p className="text-gray-600">ستتم إضافة إدارة الإنتاج قريباً</p>
-  </div>
-);
-
-const ExpensesPage = () => (
-  <div className="text-center py-12">
-    <div className="text-6xl mb-4">💰</div>
-    <h2 className="text-2xl font-semibold text-gray-900 mb-2">صفحة المصروفات</h2>
-    <p className="text-gray-600">ستتم إضافة إدارة المصروفات قريباً</p>
-  </div>
-);
-
-const InvoicesPage = () => (
-  <div className="text-center py-12">
-    <div className="text-6xl mb-4">📄</div>
-    <h2 className="text-2xl font-semibold text-gray-900 mb-2">صفحة الفواتير</h2>
-    <p className="text-gray-600">ستتم إضافة إدارة الفواتير قريباً</p>
-  </div>
-);
-
-const AttendancePage = () => (
-  <div className="text-center py-12">
-    <div className="text-6xl mb-4">👥</div>
-    <h2 className="text-2xl font-semibold text-gray-900 mb-2">صفحة الحضور</h2>
-    <p className="text-gray-600">ستتم إضافة إدارة الحضور قريباً</p>
-  </div>
-);
+// Import comprehensive management components
+import ProductionManagement from './components/ProductionManagement';
+import ExpenseManagement from './components/ExpenseManagement';
+import InvoiceManagement from './components/InvoiceManagement';
+import AttendanceManagement from './components/AttendanceManagement';
 
 // Main App Component
 function App() {
