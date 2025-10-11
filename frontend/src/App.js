@@ -12,71 +12,7 @@ import {
   useApp 
 } from "./components/MultiCompanyApp";
 
-// Auth Provider Component
-const AuthProvider = ({ children }) => {
-  const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    const token = localStorage.getItem('token');
-    if (token) {
-      // Verify token and get user info
-      axios.get(`${API}/me`)
-        .then(response => {
-          setUser(response.data);
-        })
-        .catch(() => {
-          localStorage.removeItem('token');
-        })
-        .finally(() => setLoading(false));
-    } else {
-      setLoading(false);
-    }
-  }, []);
-
-  const login = async (username, password) => {
-    try {
-      const response = await axios.post(`${API}/login`, { username, password });
-      const { access_token } = response.data;
-      localStorage.setItem('token', access_token);
-      
-      // Get user info
-      const userResponse = await axios.get(`${API}/me`);
-      setUser(userResponse.data);
-      return { success: true };
-    } catch (error) {
-      return { success: false, error: error.response?.data?.detail || 'Login failed' };
-    }
-  };
-
-  const register = async (userData) => {
-    try {
-      await axios.post(`${API}/register`, userData);
-      return { success: true };
-    } catch (error) {
-      return { success: false, error: error.response?.data?.detail || 'Registration failed' };
-    }
-  };
-
-  const logout = () => {
-    localStorage.removeItem('token');
-    setUser(null);
-  };
-
-  const value = {
-    user,
-    login,
-    register,
-    logout,
-    loading
-  };
-
-  return (
-    <AuthContext.Provider value={value}>
-      {children}
-    </AuthContext.Provider>
-  );
-};
+// Authentication and layout now handled by MultiCompanyApp components
 
 // Protected Route Component
 const ProtectedRoute = ({ children }) => {
