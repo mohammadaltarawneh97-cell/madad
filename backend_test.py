@@ -251,36 +251,62 @@ class RBACAPITester:
             self.log_result(f"Production POST Denied - {username} ({self.test_users[username]['role']})", 
                            success, "✓ Correctly denied access" if success else f"✗ Should be denied: {data.get('error', '')}")
     
-    def test_expense_management(self):
-        """Test expense CRUD operations"""
-        print("\n💰 Testing Expense Management...")
+    def test_expenses_permissions(self):
+        """Test expenses endpoint permissions for all roles"""
+        print("\n💰 Testing Expenses Permissions...")
         
-        if not self.token:
-            self.log_result("Expense Tests", False, "No authentication token available")
-            return
-        
-        # Test create expense
+        # Expense test data
         expense_data = {
             "date": datetime.now(timezone.utc).isoformat(),
             "category": "FUEL",
             "subcategory": "ديزل",
             "amount": 1500.75,
-            "description": "Fuel for dump trucks",
-            "equipment_id": self.test_data.get('equipment_id'),
+            "description": "Fuel for excavator operations",
             "receipt_number": "RCP001"
         }
         
-        success, data = self.make_request('POST', 'expenses', expense_data, 200)
-        self.log_result("Create Expense", success,
-                       f"Amount: {data.get('amount', 'Unknown')} SAR" if success else data.get('error', ''))
+        # Expected permissions
+        expected_get_success = ["owner_ali", "manager_mohammad", "accountant_fatima", "foreman_ahmed"]
+        expected_get_fail = ["driver_khalid", "guard_omar"]
+        expected_post_success = ["owner_ali", "accountant_fatima"]
+        expected_post_fail = ["manager_mohammad", "foreman_ahmed", "driver_khalid", "guard_omar"]
         
-        if success:
-            self.test_data['expense_id'] = data.get('id')
+        # Test GET /api/expenses
+        for username in self.test_users.keys():
+            if username not in self.user_tokens:
+                continue
+                
+            success, data = self.make_request('GET', 'expenses', token=self.user_tokens[username])
             
-            # Test get all expenses
-            success, data = self.make_request('GET', 'expenses')
-            self.log_result("Get All Expenses", success,
-                           f"Count: {len(data) if isinstance(data, list) else 'Unknown'}" if success else data.get('error', ''))
+            if username in expected_get_success:
+                expected_status = success
+                result_msg = f"✓ Allowed access" if success else f"✗ Should have access: {data.get('error', '')}"
+            else:
+                expected_status = not success
+                result_msg = f"✓ Correctly denied access" if not success else f"✗ Should be denied access"
+            
+            self.log_result(f"Expenses GET - {username} ({self.test_users[username]['role']})", 
+                           expected_status, result_msg)
+        
+        # Test POST /api/expenses (users who should succeed)
+        for username in expected_post_success:
+            if username not in self.user_tokens:
+                continue
+                
+            success, data = self.make_request('POST', 'expenses', expense_data, 
+                                            token=self.user_tokens[username])
+            self.log_result(f"Expenses POST - {username} ({self.test_users[username]['role']})", 
+                           success, f"Created expense: {data.get('id', 'Unknown')}" if success else data.get('error', ''))
+        
+        # Test POST /api/expenses (users who should fail)
+        for username in expected_post_fail:
+            if username not in self.user_tokens:
+                continue
+                
+            success, data = self.make_request('POST', 'expenses', expense_data, 
+                                            expected_status=403, token=self.user_tokens[username])
+            self.log_result(f"Expenses POST Denied - {username} ({self.test_users[username]['role']})", 
+                           success, "✓ Correctly denied access" if success else f"✗ Should be denied: {data.get('error', '')}")
     
     def test_invoice_management(self):
         """Test invoice CRUD operations"""
