@@ -34,6 +34,8 @@ const AppProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [currentCompany, setCurrentCompany] = useState(null);
   const [companies, setCompanies] = useState([]);
+  const [permissions, setPermissions] = useState({});
+  const [userRole, setUserRole] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -51,6 +53,8 @@ const AppProvider = ({ children }) => {
       const response = await axios.get(`${API}/me`);
       setUser(response.data.user);
       setCurrentCompany(response.data.company);
+      setPermissions(response.data.permissions || {});
+      setUserRole(response.data.role);
       
       // Fetch available companies
       const companiesResponse = await axios.get(`${API}/companies`);
