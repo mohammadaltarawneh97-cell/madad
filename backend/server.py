@@ -174,7 +174,7 @@ async def list_companies(user: User = Depends(get_current_user)):
 async def get_company(company_id: str, user: User = Depends(get_current_user)):
     """Get company details"""
     # Check access rights
-    if not user.is_super_admin and company_id not in (user.companies or []) and company_id != user.company_id:
+    if user.role != UserRole.SUPERADMIN and company_id not in (user.companies or []) and company_id != user.company_id:
         raise HTTPException(status_code=403, detail="Access denied to this company")
     
     company_doc = await db.companies.find_one({"id": company_id}, {"_id": 0})
