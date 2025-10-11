@@ -1,0 +1,396 @@
+#!/usr/bin/env python3
+"""
+Comprehensive Backend API Testing for Khairat Al Ardh Operations Management System
+Tests all endpoints including authentication, equipment, production, expenses, invoices, attendance, and dashboard analytics.
+"""
+
+import requests
+import sys
+import json
+from datetime import datetime, timezone
+from typing import Dict, Any, Optional
+
+class KhairatAPITester:
+    def __init__(self, base_url: str = "https://quarry-manager.preview.emergentagent.com"):
+        self.base_url = base_url
+        self.api_url = f"{base_url}/api"
+        self.token = None
+        self.tests_run = 0
+        self.tests_passed = 0
+        self.failed_tests = []
+        self.test_data = {}
+        
+    def log_result(self, test_name: str, success: bool, details: str = ""):
+        """Log test results"""
+        self.tests_run += 1
+        if success:
+            self.tests_passed += 1
+            print(f"✅ {test_name} - PASSED {details}")
+        else:
+            self.failed_tests.append({"test": test_name, "details": details})
+            print(f"❌ {test_name} - FAILED {details}")
+    
+    def make_request(self, method: str, endpoint: str, data: Optional[Dict] = None, 
+                    expected_status: int = 200) -> tuple[bool, Dict]:
+        """Make HTTP request with error handling"""
+        url = f"{self.api_url}/{endpoint}"
+        headers = {'Content-Type': 'application/json'}
+        
+        if self.token:
+            headers['Authorization'] = f'Bearer {self.token}'
+        
+        try:
+            if method == 'GET':
+                response = requests.get(url, headers=headers, timeout=10)
+            elif method == 'POST':
+                response = requests.post(url, json=data, headers=headers, timeout=10)
+            elif method == 'PUT':
+                response = requests.put(url, json=data, headers=headers, timeout=10)
+            elif method == 'DELETE':
+                response = requests.delete(url, headers=headers, timeout=10)
+            
+            success = response.status_code == expected_status
+            
+            try:
+                response_data = response.json()
+            except:
+                response_data = {"raw_response": response.text}
+            
+            if not success:
+                error_detail = f"Status: {response.status_code}, Expected: {expected_status}, Response: {response.text[:200]}"
+                return False, {"error": error_detail}
+            
+            return True, response_data
+            
+        except requests.exceptions.RequestException as e:
+            return False, {"error": f"Request failed: {str(e)}"}
+    
+    def test_health_check(self):
+        """Test basic API health"""
+        print("\n🔍 Testing API Health...")
+        
+        # Test root endpoint
+        success, data = self.make_request('GET', '')
+        self.log_result("API Root Endpoint", success, 
+                       f"Message: {data.get('message', 'No message')}" if success else data.get('error', ''))
+        
+        # Test health endpoint
+        success, data = self.make_request('GET', 'health')
+        self.log_result("Health Check Endpoint", success,
+                       f"Status: {data.get('status', 'Unknown')}" if success else data.get('error', ''))
+    
+    def test_authentication(self):
+        """Test user registration and login"""
+        print("\n🔐 Testing Authentication...")
+        
+        # Test user registration
+        test_user_data = {
+            "username": f"test_user_{datetime.now().strftime('%H%M%S')}",
+            "email": f"test_{datetime.now().strftime('%H%M%S')}@example.com",
+            "full_name": "Test User",
+            "password": "TestPass123!"
+        }
+        
+        success, data = self.make_request('POST', 'register', test_user_data, 200)
+        self.log_result("User Registration", success,
+                       f"User ID: {data.get('id', 'Unknown')}" if success else data.get('error', ''))
+        
+        if success:
+            self.test_data['user'] = test_user_data
+            
+            # Test user login
+            login_data = {
+                "username": test_user_data["username"],
+                "password": test_user_data["password"]
+            }
+            
+            success, data = self.make_request('POST', 'login', login_data, 200)
+            self.log_result("User Login", success,
+                           f"Token received: {'Yes' if data.get('access_token') else 'No'}" if success else data.get('error', ''))
+            
+            if success and data.get('access_token'):
+                self.token = data['access_token']
+                
+                # Test get current user
+                success, data = self.make_request('GET', 'me', expected_status=200)
+                self.log_result("Get Current User", success,
+                               f"Username: {data.get('username', 'Unknown')}" if success else data.get('error', ''))
+        
+        # Test invalid login
+        invalid_login = {"username": "invalid_user", "password": "wrong_pass"}
+        success, data = self.make_request('POST', 'login', invalid_login, 401)
+        self.log_result("Invalid Login Rejection", success,
+                       "Correctly rejected invalid credentials" if success else "Should have rejected invalid login")
+    
+    def test_equipment_management(self):
+        """Test equipment CRUD operations"""
+        print("\n🚛 Testing Equipment Management...")
+        
+        if not self.token:
+            self.log_result("Equipment Tests", False, "No authentication token available")
+            return
+        
+        # Test create equipment
+        equipment_data = {
+            "name": "Test Dump Truck 1",
+            "type": "DT",
+            "model": "CAT 777D",
+            "serial_number": "DT001",
+            "hours_operated": 1250.5,
+            "maintenance_notes": "Regular maintenance required"
+        }
+        
+        success, data = self.make_request('POST', 'equipment', equipment_data, 200)
+        self.log_result("Create Equipment", success,
+                       f"Equipment ID: {data.get('id', 'Unknown')}" if success else data.get('error', ''))
+        
+        if success:
+            equipment_id = data.get('id')
+            self.test_data['equipment_id'] = equipment_id
+            
+            # Test get all equipment
+            success, data = self.make_request('GET', 'equipment')
+            self.log_result("Get All Equipment", success,
+                           f"Count: {len(data) if isinstance(data, list) else 'Unknown'}" if success else data.get('error', ''))
+            
+            # Test get equipment by ID
+            success, data = self.make_request('GET', f'equipment/{equipment_id}')
+            self.log_result("Get Equipment by ID", success,
+                           f"Name: {data.get('name', 'Unknown')}" if success else data.get('error', ''))
+            
+            # Test update equipment
+            update_data = {
+                "name": "Updated Test Dump Truck 1",
+                "type": "DT",
+                "model": "CAT 777D",
+                "serial_number": "DT001",
+                "hours_operated": 1300.0,
+                "maintenance_notes": "Updated maintenance notes"
+            }
+            
+            success, data = self.make_request('PUT', f'equipment/{equipment_id}', update_data)
+            self.log_result("Update Equipment", success,
+                           f"Updated name: {data.get('name', 'Unknown')}" if success else data.get('error', ''))
+    
+    def test_production_management(self):
+        """Test production CRUD operations"""
+        print("\n⚡ Testing Production Management...")
+        
+        if not self.token:
+            self.log_result("Production Tests", False, "No authentication token available")
+            return
+        
+        # Test create production record
+        production_data = {
+            "date": datetime.now(timezone.utc).isoformat(),
+            "activity_type": "SCREENING",
+            "actual_qty": 850.0,
+            "contract_qty": 1000.0,
+            "equipment_ids": [self.test_data.get('equipment_id', '')],
+            "notes": "Good production day"
+        }
+        
+        success, data = self.make_request('POST', 'production', production_data, 200)
+        self.log_result("Create Production Record", success,
+                       f"Completion Rate: {data.get('completion_rate', 'Unknown')}%" if success else data.get('error', ''))
+        
+        if success:
+            self.test_data['production_id'] = data.get('id')
+            
+            # Test get all production records
+            success, data = self.make_request('GET', 'production')
+            self.log_result("Get All Production Records", success,
+                           f"Count: {len(data) if isinstance(data, list) else 'Unknown'}" if success else data.get('error', ''))
+    
+    def test_expense_management(self):
+        """Test expense CRUD operations"""
+        print("\n💰 Testing Expense Management...")
+        
+        if not self.token:
+            self.log_result("Expense Tests", False, "No authentication token available")
+            return
+        
+        # Test create expense
+        expense_data = {
+            "date": datetime.now(timezone.utc).isoformat(),
+            "category": "FUEL",
+            "subcategory": "ديزل",
+            "amount": 1500.75,
+            "description": "Fuel for dump trucks",
+            "equipment_id": self.test_data.get('equipment_id'),
+            "receipt_number": "RCP001"
+        }
+        
+        success, data = self.make_request('POST', 'expenses', expense_data, 200)
+        self.log_result("Create Expense", success,
+                       f"Amount: {data.get('amount', 'Unknown')} SAR" if success else data.get('error', ''))
+        
+        if success:
+            self.test_data['expense_id'] = data.get('id')
+            
+            # Test get all expenses
+            success, data = self.make_request('GET', 'expenses')
+            self.log_result("Get All Expenses", success,
+                           f"Count: {len(data) if isinstance(data, list) else 'Unknown'}" if success else data.get('error', ''))
+    
+    def test_invoice_management(self):
+        """Test invoice CRUD operations"""
+        print("\n📄 Testing Invoice Management...")
+        
+        if not self.token:
+            self.log_result("Invoice Tests", False, "No authentication token available")
+            return
+        
+        # Test create invoice
+        invoice_data = {
+            "date": datetime.now(timezone.utc).isoformat(),
+            "invoice_number": f"INV-{datetime.now().strftime('%Y%m%d')}-001",
+            "type": "SCREENING",
+            "client_name": "ABC Construction Company",
+            "amount": 25000.00,
+            "quantity": 1000.0,
+            "unit_price": 25.0,
+            "status": "PENDING",
+            "notes": "Screening services for project ABC"
+        }
+        
+        success, data = self.make_request('POST', 'invoices', invoice_data, 200)
+        self.log_result("Create Invoice", success,
+                       f"Invoice Number: {data.get('invoice_number', 'Unknown')}" if success else data.get('error', ''))
+        
+        if success:
+            self.test_data['invoice_id'] = data.get('id')
+            
+            # Test get all invoices
+            success, data = self.make_request('GET', 'invoices')
+            self.log_result("Get All Invoices", success,
+                           f"Count: {len(data) if isinstance(data, list) else 'Unknown'}" if success else data.get('error', ''))
+    
+    def test_costing_centers(self):
+        """Test costing centers management"""
+        print("\n🏭 Testing Costing Centers...")
+        
+        if not self.token:
+            self.log_result("Costing Centers Tests", False, "No authentication token available")
+            return
+        
+        # Test create costing center
+        center_data = {
+            "name": "SCREENING",
+            "description": "Screening operations center"
+        }
+        
+        success, data = self.make_request('POST', 'costing-centers', center_data, 200)
+        self.log_result("Create Costing Center", success,
+                       f"Center Name: {data.get('name', 'Unknown')}" if success else data.get('error', ''))
+        
+        if success:
+            self.test_data['costing_center_id'] = data.get('id')
+            
+            # Test get all costing centers
+            success, data = self.make_request('GET', 'costing-centers')
+            self.log_result("Get All Costing Centers", success,
+                           f"Count: {len(data) if isinstance(data, list) else 'Unknown'}" if success else data.get('error', ''))
+    
+    def test_attendance_management(self):
+        """Test attendance CRUD operations"""
+        print("\n👥 Testing Attendance Management...")
+        
+        if not self.token:
+            self.log_result("Attendance Tests", False, "No authentication token available")
+            return
+        
+        # Test create attendance record
+        attendance_data = {
+            "employee_name": "أحمد محمد",
+            "date": datetime.now(timezone.utc).isoformat(),
+            "check_in": datetime.now(timezone.utc).replace(hour=8, minute=0).isoformat(),
+            "check_out": datetime.now(timezone.utc).replace(hour=17, minute=0).isoformat(),
+            "hours_worked": 8.0,
+            "overtime_hours": 1.0,
+            "notes": "Regular work day with 1 hour overtime"
+        }
+        
+        success, data = self.make_request('POST', 'attendance', attendance_data, 200)
+        self.log_result("Create Attendance Record", success,
+                       f"Employee: {data.get('employee_name', 'Unknown')}" if success else data.get('error', ''))
+        
+        if success:
+            self.test_data['attendance_id'] = data.get('id')
+            
+            # Test get all attendance records
+            success, data = self.make_request('GET', 'attendance')
+            self.log_result("Get All Attendance Records", success,
+                           f"Count: {len(data) if isinstance(data, list) else 'Unknown'}" if success else data.get('error', ''))
+    
+    def test_dashboard_analytics(self):
+        """Test dashboard analytics endpoint"""
+        print("\n📊 Testing Dashboard Analytics...")
+        
+        if not self.token:
+            self.log_result("Dashboard Tests", False, "No authentication token available")
+            return
+        
+        # Test dashboard stats
+        success, data = self.make_request('GET', 'dashboard/stats')
+        self.log_result("Dashboard Statistics", success,
+                       f"Equipment Count: {data.get('equipment_count', 'Unknown')}" if success else data.get('error', ''))
+        
+        if success:
+            # Validate dashboard data structure
+            required_keys = ['production', 'expenses', 'equipment_count', 'invoices', 'month']
+            missing_keys = [key for key in required_keys if key not in data]
+            
+            if not missing_keys:
+                self.log_result("Dashboard Data Structure", True, "All required keys present")
+            else:
+                self.log_result("Dashboard Data Structure", False, f"Missing keys: {missing_keys}")
+    
+    def run_all_tests(self):
+        """Run comprehensive test suite"""
+        print("🚀 Starting Comprehensive Backend API Testing for Khairat Al Ardh Operations Management System")
+        print("=" * 80)
+        
+        # Run all test categories
+        self.test_health_check()
+        self.test_authentication()
+        self.test_equipment_management()
+        self.test_costing_centers()
+        self.test_production_management()
+        self.test_expense_management()
+        self.test_invoice_management()
+        self.test_attendance_management()
+        self.test_dashboard_analytics()
+        
+        # Print final results
+        print("\n" + "=" * 80)
+        print("📋 FINAL TEST RESULTS")
+        print("=" * 80)
+        print(f"✅ Tests Passed: {self.tests_passed}/{self.tests_run}")
+        print(f"❌ Tests Failed: {len(self.failed_tests)}/{self.tests_run}")
+        print(f"📊 Success Rate: {(self.tests_passed/self.tests_run)*100:.1f}%")
+        
+        if self.failed_tests:
+            print("\n❌ FAILED TESTS:")
+            for i, failure in enumerate(self.failed_tests, 1):
+                print(f"{i}. {failure['test']}: {failure['details']}")
+        
+        print("\n🔍 Test Data Created:")
+        for key, value in self.test_data.items():
+            print(f"  - {key}: {value}")
+        
+        return self.tests_passed == self.tests_run
+
+def main():
+    """Main test execution"""
+    tester = KhairatAPITester()
+    
+    try:
+        success = tester.run_all_tests()
+        return 0 if success else 1
+    except Exception as e:
+        print(f"\n💥 CRITICAL ERROR: {str(e)}")
+        return 1
+
+if __name__ == "__main__":
+    sys.exit(main())
