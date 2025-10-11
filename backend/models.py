@@ -160,22 +160,6 @@ class ExpenseCreate(BaseModel):
     supplier: Optional[str] = None
 
 class Invoice(CompanyBaseModel):
-    INVOICE_TYPES = [
-        ('SCREENING', 'غربلة'),
-        ('CRUSHING', 'كسارة'),
-        ('HAULING', 'نقل'),
-        ('FEEDING', 'تغذية'),
-        ('WASHING', 'غسيل'),
-        ('OTHER', 'أخرى'),
-    ]
-    
-    STATUS_CHOICES = [
-        ('DRAFT', 'مسودة'),
-        ('SENT', 'مرسلة'),
-        ('PAID', 'مدفوعة'),
-        ('OVERDUE', 'متأخرة'),
-        ('CANCELLED', 'ملغاة'),
-    ]
     
     date: datetime
     invoice_number: str
