@@ -415,19 +415,25 @@ const Login = () => {
 
 // Enhanced Dashboard Layout with Company Context
 const DashboardLayout = ({ children }) => {
-  const { user, currentCompany, logout } = useApp();
+  const { user, currentCompany, permissions, userRole, logout } = useApp();
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const navigate = useNavigate();
 
-  const menuItems = [
-    { path: '/dashboard', label: 'لوحة التحكم', icon: '📊' },
-    { path: '/companies', label: 'إدارة الشركات', icon: '🏢', adminOnly: true },
-    { path: '/equipment', label: 'المعدات', icon: '🚛' },
-    { path: '/production', label: 'الإنتاج', icon: '⚡' },
-    { path: '/expenses', label: 'المصروفات', icon: '💰' },
-    { path: '/invoices', label: 'الفواتير', icon: '📄' },
-    { path: '/attendance', label: 'الحضور', icon: '👥' },
+  // Define all menu items with their required permissions
+  const allMenuItems = [
+    { path: '/dashboard', label: 'لوحة التحكم', icon: '📊', resource: 'dashboard', action: 'read' },
+    { path: '/equipment', label: 'المعدات', icon: '🚛', resource: 'equipment', action: 'read' },
+    { path: '/production', label: 'الإنتاج', icon: '⚡', resource: 'production', action: 'read' },
+    { path: '/expenses', label: 'المصروفات', icon: '💰', resource: 'expenses', action: 'read' },
+    { path: '/invoices', label: 'الفواتير', icon: '📄', resource: 'invoices', action: 'read' },
+    { path: '/attendance', label: 'الحضور', icon: '👥', resource: 'attendance', action: 'read' },
   ];
+
+  // Filter menu items based on user permissions
+  const menuItems = allMenuItems.filter(item => {
+    const resourcePermissions = permissions[item.resource] || [];
+    return resourcePermissions.includes(item.action);
+  });
 
   const handleLogout = () => {
     logout();
