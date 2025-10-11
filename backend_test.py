@@ -443,25 +443,29 @@ class RBACAPITester:
                     self.log_result(f"Dashboard Data Structure - {username}", False, f"Missing keys: {missing_keys}")
     
     def run_all_tests(self):
-        """Run comprehensive test suite"""
-        print("🚀 Starting Comprehensive Backend API Testing for Khairat Al Ardh Operations Management System")
-        print("=" * 80)
+        """Run comprehensive RBAC test suite"""
+        print("🚀 Starting RBAC Backend API Testing for Khairat Al Ardh Operations Management System")
+        print("=" * 90)
+        print("Testing 7 different roles with specific permissions:")
+        for username, user_info in self.test_users.items():
+            print(f"  👤 {user_info['role'].upper():12} | {username:20} | {user_info['full_name']}")
+        print("=" * 90)
         
         # Run all test categories
         self.test_health_check()
-        self.test_authentication()
-        self.test_equipment_management()
-        self.test_costing_centers()
-        self.test_production_management()
-        self.test_expense_management()
-        self.test_invoice_management()
-        self.test_attendance_management()
-        self.test_dashboard_analytics()
+        self.test_user_authentication()
+        self.test_user_permissions_context()
+        self.test_equipment_permissions()
+        self.test_production_permissions()
+        self.test_expenses_permissions()
+        self.test_invoices_permissions()
+        self.test_attendance_permissions()
+        self.test_dashboard_permissions()
         
         # Print final results
-        print("\n" + "=" * 80)
-        print("📋 FINAL TEST RESULTS")
-        print("=" * 80)
+        print("\n" + "=" * 90)
+        print("📋 RBAC TESTING FINAL RESULTS")
+        print("=" * 90)
         print(f"✅ Tests Passed: {self.tests_passed}/{self.tests_run}")
         print(f"❌ Tests Failed: {len(self.failed_tests)}/{self.tests_run}")
         print(f"📊 Success Rate: {(self.tests_passed/self.tests_run)*100:.1f}%")
@@ -471,15 +475,14 @@ class RBACAPITester:
             for i, failure in enumerate(self.failed_tests, 1):
                 print(f"{i}. {failure['test']}: {failure['details']}")
         
-        print("\n🔍 Test Data Created:")
-        for key, value in self.test_data.items():
-            print(f"  - {key}: {value}")
+        print(f"\n🏢 Company ID: {self.company_id}")
+        print(f"🔑 Authenticated Users: {len(self.user_tokens)}/{len(self.test_users)}")
         
         return self.tests_passed == self.tests_run
 
 def main():
     """Main test execution"""
-    tester = KhairatAPITester()
+    tester = RBACAPITester()
     
     try:
         success = tester.run_all_tests()
