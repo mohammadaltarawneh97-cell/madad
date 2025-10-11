@@ -118,12 +118,23 @@ class User(BaseModel):
     full_name: str
     company_id: Optional[str] = None  # Main company association
     companies: List[str] = Field(default_factory=list)  # Multiple company access
-    role: str = Field(default="user")  # admin, manager, accountant, foreman, user
-    is_super_admin: bool = Field(default=False)  # Platform super admin
-    is_company_admin: bool = Field(default=False)  # Company admin
+    role: UserRole = Field(default=UserRole.DRIVER)  # User role
     is_active: bool = True
+    phone: Optional[str] = None
+    department: Optional[str] = None
+    employee_id: Optional[str] = None
+    avatar_url: Optional[str] = None
     last_login: Optional[datetime] = None
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    
+    def has_permission(self, resource: str, action: str) -> bool:
+        """Check if user has permission for a resource and action"""
+        if self.role == UserRole.SUPERADMIN:
+            return True
+        
+        permissions = ROLE_PERMISSIONS.get(self.role, {})
+        resource_permissions = permissions.get(resource, [])
+        return action in resource_permissions
 
 class UserCreate(BaseModel):
     username: str
