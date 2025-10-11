@@ -141,15 +141,18 @@ backend:
 
   - task: "Protected API Endpoints"
     implemented: true
-    working: true
+    working: false
     file: "backend/server.py"
-    stuck_count: 0
+    stuck_count: 1
     priority: "high"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
       - working: true
         agent: "main"
         comment: "Added permission checks to all endpoints (equipment, production, expenses, invoices, attendance, dashboard)"
+      - working: false
+        agent: "testing"
+        comment: "RBAC Testing Results (96.7% success rate): Found 3 critical permission issues: 1) Accountant has equipment read access when should be denied, 2) Foreman missing equipment create permission, 3) Accountant missing attendance create permission. All other permissions working correctly including proper 403 denials."
 
   - task: "User Role Management"
     implemented: true
