@@ -533,3 +533,162 @@ class DocumentCreate(BaseModel):
     mime_type: Optional[str] = None
     description: Optional[str] = None
     tags: List[str] = Field(default_factory=list)
+
+
+# HR Management Models (Oracle-style)
+class EmploymentStatus(str, Enum):
+    ACTIVE = "active"
+    ON_LEAVE = "on_leave"
+    SUSPENDED = "suspended"
+    TERMINATED = "terminated"
+
+class ContractType(str, Enum):
+    FULL_TIME = "full_time"
+    PART_TIME = "part_time"
+    CONTRACT = "contract"
+    TEMPORARY = "temporary"
+
+class Employee(CompanyBaseModel):
+    user_id: str  # Link to User
+    employee_number: str
+    full_name: str
+    full_name_ar: str
+    national_id: Optional[str] = None
+    passport_number: Optional[str] = None
+    date_of_birth: Optional[datetime] = None
+    gender: Optional[str] = None
+    nationality: Optional[str] = None
+    
+    # Contact
+    phone: str
+    emergency_contact: Optional[str] = None
+    emergency_phone: Optional[str] = None
+    address: Optional[str] = None
+    
+    # Employment
+    employment_status: EmploymentStatus = EmploymentStatus.ACTIVE
+    contract_type: ContractType = ContractType.FULL_TIME
+    department: str
+    position: str
+    position_ar: str
+    hire_date: datetime
+    termination_date: Optional[datetime] = None
+    
+    # Salary (RESTRICTED - only owner/accountant/employee can see)
+    base_salary: float
+    currency: str = "JOD"
+    
+    # Manager
+    manager_id: Optional[str] = None
+    
+    # Documents
+    documents: List[str] = Field(default_factory=list)
+    
+    # Notes (NOT visible to employee)
+    notes: Optional[str] = None
+
+class EmployeeCreate(BaseModel):
+    user_id: str
+    employee_number: str
+    full_name: str
+    full_name_ar: str
+    phone: str
+    department: str
+    position: str
+    position_ar: str
+    hire_date: datetime
+    base_salary: float
+    contract_type: Optional[ContractType] = ContractType.FULL_TIME
+
+class SalaryPayment(CompanyBaseModel):
+    employee_id: str
+    employee_name: str
+    month: int  # 1-12
+    year: int
+    base_salary: float
+    bonuses: float = 0.0
+    deductions: float = 0.0
+    overtime_pay: float = 0.0
+    net_salary: float
+    currency: str = "JOD"
+    payment_date: Optional[datetime] = None
+    payment_method: Optional[str] = None  # bank_transfer, cash, check
+    status: str = "pending"  # pending, paid, cancelled
+    notes: Optional[str] = None
+
+class SalaryPaymentCreate(BaseModel):
+    employee_id: str
+    month: int
+    year: int
+    base_salary: float
+    bonuses: Optional[float] = 0.0
+    deductions: Optional[float] = 0.0
+    overtime_pay: Optional[float] = 0.0
+
+class Leave(CompanyBaseModel):
+    employee_id: str
+    employee_name: str
+    leave_type: str  # annual, sick, unpaid, emergency
+    start_date: datetime
+    end_date: datetime
+    days: int
+    reason: Optional[str] = None
+    status: str = "pending"  # pending, approved, rejected
+    approved_by: Optional[str] = None
+    approved_date: Optional[datetime] = None
+    notes: Optional[str] = None
+
+class LeaveCreate(BaseModel):
+    employee_id: str
+    leave_type: str
+    start_date: datetime
+    end_date: datetime
+    reason: Optional[str] = None
+
+# Vehicle & GPS Tracking (for Drivers)
+class VehicleStatus(str, Enum):
+    ACTIVE = "active"
+    MAINTENANCE = "maintenance"
+    OUT_OF_SERVICE = "out_of_service"
+
+class Vehicle(CompanyBaseModel):
+    vehicle_number: str
+    vehicle_type: str  # truck, excavator, loader, etc
+    make: str
+    model: str
+    year: Optional[int] = None
+    license_plate: str
+    vin: Optional[str] = None
+    status: VehicleStatus = VehicleStatus.ACTIVE
+    
+    # Assignment
+    assigned_driver_id: Optional[str] = None
+    assigned_driver_name: Optional[str] = None
+    
+    # GPS Data
+    last_location_lat: Optional[float] = None
+    last_location_lng: Optional[float] = None
+    last_location_address: Optional[str] = None
+    last_location_update: Optional[datetime] = None
+    
+    # Maintenance
+    last_maintenance_date: Optional[datetime] = None
+    next_maintenance_date: Optional[datetime] = None
+    odometer: Optional[float] = None  # km
+    
+    notes: Optional[str] = None
+
+class VehicleCreate(BaseModel):
+    vehicle_number: str
+    vehicle_type: str
+    make: str
+    model: str
+    license_plate: str
+    year: Optional[int] = None
+
+class VehicleLocationUpdate(BaseModel):
+    vehicle_id: str
+    latitude: float
+    longitude: float
+    address: Optional[str] = None
+
