@@ -832,4 +832,194 @@ logger = logging.getLogger(__name__)
 
 @app.on_event("shutdown")
 async def shutdown_db_client():
+
+
+# HR Management Routes
+@api_router.post("/employees", response_model=Employee)
+async def create_employee(employee_data: EmployeeCreate, user: User = Depends(get_current_user)):
+    if not user.has_permission("employees", "create"):
+        raise HTTPException(status_code=403, detail="You don't have permission to create employees")
+    
+    if not hasattr(user, 'current_company_id') or not user.current_company_id:
+        raise HTTPException(status_code=400, detail="No company context")
+    
+    employee_obj = Employee(**employee_data.model_dump(), company_id=user.current_company_id)
+    doc = employee_obj.model_dump()
+    serialize_datetime(doc)
+    
+    await db.employees.insert_one(doc)
+    return employee_obj
+
+@api_router.get("/employees", response_model=List[Employee])
+async def get_employees(user: User = Depends(get_current_user)):
+    if not user.has_permission("employees", "read") and not user.has_permission("employees", "read_own"):
+        raise HTTPException(status_code=403, detail="You don't have permission to view employees")
+    
+    if not hasattr(user, 'current_company_id') or not user.current_company_id:
+        raise HTTPException(status_code=400, detail="No company context")
+    
+    # Drivers can only see their own employee record
+    if user.has_permission("employees", "read_own"):
+        employees_list = await db.employees.find(
+            {"company_id": user.current_company_id, "user_id": user.id}, 
+            {"_id": 0}
+        ).to_list(1)
+    else:
+        employees_list = await db.employees.find(
+            {"company_id": user.current_company_id}, 
+            {"_id": 0}
+        ).to_list(1000)
+    
+    for employee in employees_list:
+        deserialize_datetime(employee, ['created_at', 'updated_at', 'date_of_birth', 'hire_date', 'termination_date'])
+    
+    return employees_list
+
+@api_router.get("/employees/me", response_model=Employee)
+async def get_my_employee_profile(user: User = Depends(get_current_user)):
+    """Get current user's employee profile"""
+    employee_doc = await db.employees.find_one({"user_id": user.id, "company_id": user.current_company_id}, {"_id": 0})
+    if not employee_doc:
+        raise HTTPException(status_code=404, detail="Employee profile not found")
+    
+    deserialize_datetime(employee_doc, ['created_at', 'updated_at', 'date_of_birth', 'hire_date', 'termination_date'])
+    return Employee(**employee_doc)
+
+# Salary Routes
+@api_router.post("/salary-payments", response_model=SalaryPayment)
+async def create_salary_payment(payment_data: SalaryPaymentCreate, user: User = Depends(get_current_user)):
+    if not user.has_permission("salary", "create"):
+        raise HTTPException(status_code=403, detail="You don't have permission to create salary payments")
+    
+    if not hasattr(user, 'current_company_id') or not user.current_company_id:
+        raise HTTPException(status_code=400, detail="No company context")
+    
+    # Get employee name
+    employee = await db.employees.find_one({"id": payment_data.employee_id})
+    if not employee:
+        raise HTTPException(status_code=404, detail="Employee not found")
+    
+    # Calculate net salary
+    net_salary = (payment_data.base_salary + payment_data.bonuses + payment_data.overtime_pay - payment_data.deductions)
+    
+    payment_obj = SalaryPayment(
+        **payment_data.model_dump(), 
+        employee_name=employee['full_name'],
+        net_salary=net_salary,
+        company_id=user.current_company_id
+    )
+    doc = payment_obj.model_dump()
+    serialize_datetime(doc)
+    
+    await db.salary_payments.insert_one(doc)
+    return payment_obj
+
+@api_router.get("/salary-payments", response_model=List[SalaryPayment])
+async def get_salary_payments(employee_id: Optional[str] = None, user: User = Depends(get_current_user)):
+    if not user.has_permission("salary", "read") and not user.has_permission("salary", "read_own"):
+        raise HTTPException(status_code=403, detail="You don't have permission to view salary payments")
+    
+    if not hasattr(user, 'current_company_id') or not user.current_company_id:
+        raise HTTPException(status_code=400, detail="No company context")
+    
+    query = {"company_id": user.current_company_id}
+    
+    # Drivers can only see their own salary
+    if user.has_permission("salary", "read_own"):
+        my_employee = await db.employees.find_one({"user_id": user.id})
+        if my_employee:
+            query["employee_id"] = my_employee['id']
+    elif employee_id:
+        query["employee_id"] = employee_id
+    
+    payments_list = await db.salary_payments.find(query, {"_id": 0}).sort("year", -1).sort("month", -1).to_list(1000)
+    
+    for payment in payments_list:
+        deserialize_datetime(payment, ['created_at', 'updated_at', 'payment_date'])
+    
+    return payments_list
+
+# Vehicle & GPS Routes
+@api_router.post("/vehicles", response_model=Vehicle)
+async def create_vehicle(vehicle_data: VehicleCreate, user: User = Depends(get_current_user)):
+    if not user.has_permission("vehicles", "create"):
+        raise HTTPException(status_code=403, detail="You don't have permission to create vehicles")
+    
+    if not hasattr(user, 'current_company_id') or not user.current_company_id:
+        raise HTTPException(status_code=400, detail="No company context")
+    
+    vehicle_obj = Vehicle(**vehicle_data.model_dump(), company_id=user.current_company_id)
+    doc = vehicle_obj.model_dump()
+    serialize_datetime(doc)
+    
+    await db.vehicles.insert_one(doc)
+    return vehicle_obj
+
+@api_router.get("/vehicles", response_model=List[Vehicle])
+async def get_vehicles(user: User = Depends(get_current_user)):
+    if not user.has_permission("vehicles", "read") and not user.has_permission("vehicles", "read_assigned"):
+        raise HTTPException(status_code=403, detail="You don't have permission to view vehicles")
+    
+    if not hasattr(user, 'current_company_id') or not user.current_company_id:
+        raise HTTPException(status_code=400, detail="No company context")
+    
+    query = {"company_id": user.current_company_id}
+    
+    # Drivers can only see their assigned vehicle
+    if user.has_permission("vehicles", "read_assigned"):
+        query["assigned_driver_id"] = user.id
+    
+    vehicles_list = await db.vehicles.find(query, {"_id": 0}).to_list(1000)
+    
+    for vehicle in vehicles_list:
+        deserialize_datetime(vehicle, ['created_at', 'updated_at', 'last_location_update', 'last_maintenance_date', 'next_maintenance_date'])
+    
+    return vehicles_list
+
+@api_router.put("/vehicles/{vehicle_id}/location")
+async def update_vehicle_location(vehicle_id: str, location_data: VehicleLocationUpdate, user: User = Depends(get_current_user)):
+    if not user.has_permission("vehicle_location", "update"):
+        raise HTTPException(status_code=403, detail="You don't have permission to update vehicle location")
+    
+    # Verify vehicle exists and belongs to company
+    vehicle = await db.vehicles.find_one({"id": vehicle_id, "company_id": user.current_company_id})
+    if not vehicle:
+        raise HTTPException(status_code=404, detail="Vehicle not found")
+    
+    # Drivers can only update their assigned vehicle
+    if user.role == UserRole.DRIVER and vehicle.get('assigned_driver_id') != user.id:
+        raise HTTPException(status_code=403, detail="You can only update your assigned vehicle")
+    
+    update_data = {
+        "last_location_lat": location_data.latitude,
+        "last_location_lng": location_data.longitude,
+        "last_location_address": location_data.address,
+        "last_location_update": datetime.now(timezone.utc).isoformat(),
+        "updated_at": datetime.now(timezone.utc).isoformat()
+    }
+    
+    await db.vehicles.update_one({"id": vehicle_id}, {"$set": update_data})
+    
+    return {"success": True, "message": "Location updated"}
+
+@api_router.put("/vehicles/{vehicle_id}/assign")
+async def assign_driver_to_vehicle(vehicle_id: str, driver_id: str, user: User = Depends(get_current_user)):
+    if not user.has_permission("vehicles", "update"):
+        raise HTTPException(status_code=403, detail="You don't have permission to assign vehicles")
+    
+    # Get driver info
+    driver = await db.users.find_one({"id": driver_id})
+    if not driver:
+        raise HTTPException(status_code=404, detail="Driver not found")
+    
+    update_data = {
+        "assigned_driver_id": driver_id,
+        "assigned_driver_name": driver['full_name'],
+        "updated_at": datetime.now(timezone.utc).isoformat()
+    }
+    
+    await db.vehicles.update_one({"id": vehicle_id}, {"$set": update_data})
+    
+    return {"success": True, "message": "Driver assigned to vehicle"}
+
     client.close()
