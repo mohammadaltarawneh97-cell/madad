@@ -76,6 +76,11 @@ const AppProvider = ({ children }) => {
       setUser(userData);
       setCurrentCompany(company);
       
+      // Fetch user permissions
+      const meResponse = await axios.get(`${API}/me`);
+      setPermissions(meResponse.data.permissions || {});
+      setUserRole(meResponse.data.role);
+      
       // Fetch available companies
       const companiesResponse = await axios.get(`${API}/companies`);
       setCompanies(companiesResponse.data);
