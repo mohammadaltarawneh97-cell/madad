@@ -491,12 +491,12 @@ const DashboardLayout = ({ children }) => {
               {user?.full_name?.charAt(0) || 'U'}
             </div>
             {sidebarOpen && (
-              <div>
+              <div className="flex-1">
                 <p className="font-medium text-gray-900">{user?.full_name}</p>
                 <p className="text-sm text-gray-600">{user?.username}</p>
-                {user?.is_super_admin && (
-                  <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
-                    مدير النظام
+                {userRole && (
+                  <span className={`inline-flex items-center px-2 py-1 mt-1 rounded-full text-xs font-medium border ${getRoleBadgeColor(userRole)}`}>
+                    {getRoleDisplayName(userRole)}
                   </span>
                 )}
               </div>
