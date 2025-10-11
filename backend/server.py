@@ -305,6 +305,10 @@ async def get_current_user_info(user: User = Depends(get_current_user), company:
 # Equipment routes (company-specific)
 @api_router.post("/equipment", response_model=Equipment)
 async def create_equipment(equipment_data: EquipmentCreate, user: User = Depends(get_current_user)):
+    # Check permission
+    if not user.has_permission("equipment", "create"):
+        raise HTTPException(status_code=403, detail="You don't have permission to create equipment")
+    
     if not hasattr(user, 'current_company_id') or not user.current_company_id:
         raise HTTPException(status_code=400, detail="No company context")
     
@@ -317,6 +321,10 @@ async def create_equipment(equipment_data: EquipmentCreate, user: User = Depends
 
 @api_router.get("/equipment", response_model=List[Equipment])
 async def get_equipment(user: User = Depends(get_current_user)):
+    # Check permission
+    if not user.has_permission("equipment", "read"):
+        raise HTTPException(status_code=403, detail="You don't have permission to view equipment")
+    
     if not hasattr(user, 'current_company_id') or not user.current_company_id:
         raise HTTPException(status_code=400, detail="No company context")
     
