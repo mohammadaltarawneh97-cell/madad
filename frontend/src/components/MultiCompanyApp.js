@@ -5,6 +5,36 @@ import axios from "axios";
 // Context for authentication and company management
 const AppContext = createContext();
 
+// Role display names in Arabic
+const RoleDisplayNames = {
+  'superadmin': 'مدير النظام',
+  'owner': 'المالك',
+  'manager': 'مدير',
+  'accountant': 'محاسب',
+  'foreman': 'مشرف',
+  'driver': 'سائق',
+  'guard': 'حارس',
+};
+
+// Get role badge color
+const getRoleBadgeColor = (role) => {
+  const colors = {
+    'superadmin': 'bg-purple-100 text-purple-800 border-purple-300',
+    'owner': 'bg-blue-100 text-blue-800 border-blue-300',
+    'manager': 'bg-green-100 text-green-800 border-green-300',
+    'accountant': 'bg-yellow-100 text-yellow-800 border-yellow-300',
+    'foreman': 'bg-orange-100 text-orange-800 border-orange-300',
+    'driver': 'bg-gray-100 text-gray-800 border-gray-300',
+    'guard': 'bg-indigo-100 text-indigo-800 border-indigo-300',
+  };
+  return colors[role] || 'bg-gray-100 text-gray-800 border-gray-300';
+};
+
+// Get role display name
+const getRoleDisplayName = (role) => {
+  return RoleDisplayNames[role] || role;
+};
+
 const useApp = () => {
   const context = useContext(AppContext);
   if (!context) {
