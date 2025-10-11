@@ -92,14 +92,6 @@ class CostingCenterCreate(BaseModel):
     description: Optional[str] = None
 
 class Equipment(CompanyBaseModel):
-    EQUIPMENT_TYPES = [
-        ('DT', 'شاحنة قلاب'),
-        ('PC', 'حفارة'),
-        ('WL', 'محمل'),
-        ('GR', 'جريدر'),
-        ('RL', 'رولر'),
-        ('PLANT', 'معدات المصنع'),
-    ]
     
     name: str
     type: str
