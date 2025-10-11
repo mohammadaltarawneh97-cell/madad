@@ -108,6 +108,10 @@ const AppProvider = ({ children }) => {
       localStorage.setItem('token', access_token);
       setCurrentCompany(company);
       
+      // Re-fetch permissions after switching
+      const meResponse = await axios.get(`${API}/me`);
+      setPermissions(meResponse.data.permissions || {});
+      
       return { success: true };
     } catch (error) {
       return { success: false, error: error.response?.data?.detail || 'Failed to switch company' };
@@ -119,6 +123,8 @@ const AppProvider = ({ children }) => {
     setUser(null);
     setCurrentCompany(null);
     setCompanies([]);
+    setPermissions({});
+    setUserRole(null);
   };
 
   const value = {
