@@ -1,0 +1,77 @@
+{
+  "modules": {
+    "equipment": {
+      "enabled": true,
+      "description": "Equipment management and tracking"
+    },
+    "production": {
+      "enabled": true,
+      "description": "Production records and completion tracking"
+    },
+    "expenses": {
+      "enabled": true,
+      "description": "Expense management and categorization"
+    },
+    "invoices": {
+      "enabled": true,
+      "description": "Invoice management and client billing"
+    },
+    "licenses": {
+      "enabled": true,
+      "description": "License and permit management"
+    },
+    "insurance": {
+      "enabled": true,
+      "description": "Insurance policy management"
+    },
+    "certificates": {
+      "enabled": true,
+      "description": "Company certificates and documentation"
+    },
+    "mous": {
+      "enabled": true,
+      "description": "Memorandums of Understanding"
+    },
+    "financial_statements": {
+      "enabled": true,
+      "description": "Financial statements and reporting"
+    },
+    "attendance": {
+      "enabled": true,
+      "description": "Employee attendance tracking"
+    },
+    "costing_centers": {
+      "enabled": true,
+      "description": "Cost center management"
+    }
+  },
+  "features": {
+    "file_uploads": {
+      "enabled": true,
+      "s3_presigned": true,
+      "description": "File upload capabilities with S3 support"
+    },
+    "csv_import_export": {
+      "enabled": true,
+      "templates": true,
+      "samples": true,
+      "description": "CSV import/export functionality"
+    },
+    "rbac": {
+      "enabled": true,
+      "roles": ["Admin", "Manager", "Accountant", "Foreman"],
+      "description": "Role-based access control"
+    },
+    "reporting": {
+      "enabled": true,
+      "charts": true,
+      "exports": true,
+      "description": "Advanced reporting and analytics"
+    },
+    "arabic_ui": {
+      "enabled": true,
+      "rtl": true,
+      "description": "Arabic language support with RTL layout"
+    }
+  }
+}
