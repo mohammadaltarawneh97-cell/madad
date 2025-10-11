@@ -331,3 +331,185 @@ class Token(BaseModel):
     expires_in: int
     user: User
     company: Optional[Company] = None
+
+
+# Project Management Models
+class ProjectStatus(str, Enum):
+    PLANNING = "planning"
+    IN_PROGRESS = "in_progress"
+    ON_HOLD = "on_hold"
+    COMPLETED = "completed"
+    CANCELLED = "cancelled"
+
+class ProjectPriority(str, Enum):
+    LOW = "low"
+    MEDIUM = "medium"
+    HIGH = "high"
+    CRITICAL = "critical"
+
+class Project(CompanyBaseModel):
+    name: str
+    name_ar: str
+    description: Optional[str] = None
+    status: ProjectStatus = ProjectStatus.PLANNING
+    priority: ProjectPriority = ProjectPriority.MEDIUM
+    start_date: Optional[datetime] = None
+    end_date: Optional[datetime] = None
+    estimated_budget: Optional[float] = None
+    actual_cost: Optional[float] = None
+    completion_percentage: float = 0.0
+    project_manager: Optional[str] = None
+    team_members: List[str] = Field(default_factory=list)
+    location: Optional[str] = None
+    objectives: Optional[str] = None
+    deliverables: List[str] = Field(default_factory=list)
+    tags: List[str] = Field(default_factory=list)
+    documents: List[str] = Field(default_factory=list)  # Document IDs
+
+class ProjectCreate(BaseModel):
+    name: str
+    name_ar: str
+    description: Optional[str] = None
+    status: Optional[ProjectStatus] = ProjectStatus.PLANNING
+    priority: Optional[ProjectPriority] = ProjectPriority.MEDIUM
+    start_date: Optional[datetime] = None
+    end_date: Optional[datetime] = None
+    estimated_budget: Optional[float] = None
+    project_manager: Optional[str] = None
+    location: Optional[str] = None
+    objectives: Optional[str] = None
+
+# Feasibility Study Models
+class StudyPhaseStatus(str, Enum):
+    NOT_STARTED = "not_started"
+    IN_PROGRESS = "in_progress"
+    COMPLETED = "completed"
+    DELAYED = "delayed"
+
+class FeasibilityPhase(BaseModel):
+    phase_number: int
+    phase_name: str
+    phase_name_ar: str
+    description: Optional[str] = None
+    status: StudyPhaseStatus = StudyPhaseStatus.NOT_STARTED
+    start_date: Optional[datetime] = None
+    end_date: Optional[datetime] = None
+    duration_weeks: Optional[int] = None
+    deliverables: List[str] = Field(default_factory=list)
+    completion_percentage: float = 0.0
+    notes: Optional[str] = None
+
+class FeasibilityStudy(CompanyBaseModel):
+    project_id: str  # Link to Project
+    study_name: str
+    study_name_ar: str
+    consultant: Optional[str] = None
+    study_cost: Optional[float] = None
+    currency: str = "JOD"
+    total_duration_weeks: Optional[int] = None
+    start_date: Optional[datetime] = None
+    expected_end_date: Optional[datetime] = None
+    actual_end_date: Optional[datetime] = None
+    overall_status: StudyPhaseStatus = StudyPhaseStatus.NOT_STARTED
+    phases: List[FeasibilityPhase] = Field(default_factory=list)
+    findings: Optional[str] = None
+    recommendations: Optional[str] = None
+    documents: List[str] = Field(default_factory=list)
+
+class FeasibilityStudyCreate(BaseModel):
+    project_id: str
+    study_name: str
+    study_name_ar: str
+    consultant: Optional[str] = None
+    study_cost: Optional[float] = None
+    total_duration_weeks: Optional[int] = None
+    start_date: Optional[datetime] = None
+
+# Investment & Financial Tracking Models
+class InvestmentType(str, Enum):
+    EQUITY = "equity"
+    DEBT = "debt"
+    GRANT = "grant"
+    INTERNAL = "internal"
+
+class Investment(CompanyBaseModel):
+    project_id: str  # Link to Project
+    investor_name: str
+    investment_type: InvestmentType
+    amount: float
+    currency: str = "JOD"
+    investment_date: datetime
+    expected_return_percentage: Optional[float] = None
+    maturity_date: Optional[datetime] = None
+    terms: Optional[str] = None
+    status: str = "active"
+    notes: Optional[str] = None
+
+class InvestmentCreate(BaseModel):
+    project_id: str
+    investor_name: str
+    investment_type: InvestmentType
+    amount: float
+    currency: Optional[str] = "JOD"
+    investment_date: datetime
+    expected_return_percentage: Optional[float] = None
+    maturity_date: Optional[datetime] = None
+    terms: Optional[str] = None
+
+class FinancialProjection(CompanyBaseModel):
+    project_id: str
+    year: int
+    capex: Optional[float] = None  # Capital Expenditure
+    opex: Optional[float] = None  # Operational Expenditure
+    revenue: Optional[float] = None
+    gross_profit: Optional[float] = None
+    net_profit: Optional[float] = None
+    cash_flow: Optional[float] = None
+    roi: Optional[float] = None  # Return on Investment
+    npv: Optional[float] = None  # Net Present Value
+    irr: Optional[float] = None  # Internal Rate of Return
+    payback_period: Optional[float] = None  # In years
+    notes: Optional[str] = None
+
+class FinancialProjectionCreate(BaseModel):
+    project_id: str
+    year: int
+    capex: Optional[float] = None
+    opex: Optional[float] = None
+    revenue: Optional[float] = None
+    notes: Optional[str] = None
+
+# Document Management Models
+class DocumentType(str, Enum):
+    CONTRACT = "contract"
+    FEASIBILITY_REPORT = "feasibility_report"
+    TECHNICAL_SPEC = "technical_spec"
+    FINANCIAL_REPORT = "financial_report"
+    PROPOSAL = "proposal"
+    PRESENTATION = "presentation"
+    OTHER = "other"
+
+class Document(CompanyBaseModel):
+    name: str
+    name_ar: Optional[str] = None
+    document_type: DocumentType
+    project_id: Optional[str] = None
+    file_url: str
+    file_size: Optional[int] = None  # In bytes
+    mime_type: Optional[str] = None
+    version: str = "1.0"
+    uploaded_by: Optional[str] = None
+    description: Optional[str] = None
+    tags: List[str] = Field(default_factory=list)
+    is_public: bool = False
+
+class DocumentCreate(BaseModel):
+    name: str
+    name_ar: Optional[str] = None
+    document_type: DocumentType
+    project_id: Optional[str] = None
+    file_url: str
+    file_size: Optional[int] = None
+    mime_type: Optional[str] = None
+    description: Optional[str] = None
+    tags: List[str] = Field(default_factory=list)
