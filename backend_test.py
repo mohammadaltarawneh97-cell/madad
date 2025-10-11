@@ -368,85 +368,79 @@ class RBACAPITester:
             self.log_result(f"Invoices POST Denied - {username} ({self.test_users[username]['role']})", 
                            success, "✓ Correctly denied access" if success else f"✗ Should be denied: {data.get('error', '')}")
     
-    def test_costing_centers(self):
-        """Test costing centers management"""
-        print("\n🏭 Testing Costing Centers...")
+    def test_attendance_permissions(self):
+        """Test attendance endpoint permissions for all roles"""
+        print("\n👥 Testing Attendance Permissions...")
         
-        if not self.token:
-            self.log_result("Costing Centers Tests", False, "No authentication token available")
-            return
-        
-        # Test create costing center
-        center_data = {
-            "name": "SCREENING",
-            "description": "Screening operations center"
-        }
-        
-        success, data = self.make_request('POST', 'costing-centers', center_data, 200)
-        self.log_result("Create Costing Center", success,
-                       f"Center Name: {data.get('name', 'Unknown')}" if success else data.get('error', ''))
-        
-        if success:
-            self.test_data['costing_center_id'] = data.get('id')
-            
-            # Test get all costing centers
-            success, data = self.make_request('GET', 'costing-centers')
-            self.log_result("Get All Costing Centers", success,
-                           f"Count: {len(data) if isinstance(data, list) else 'Unknown'}" if success else data.get('error', ''))
-    
-    def test_attendance_management(self):
-        """Test attendance CRUD operations"""
-        print("\n👥 Testing Attendance Management...")
-        
-        if not self.token:
-            self.log_result("Attendance Tests", False, "No authentication token available")
-            return
-        
-        # Test create attendance record
+        # Attendance test data
         attendance_data = {
-            "employee_name": "أحمد محمد",
+            "employee_name": "محمد العامل",
+            "employee_id": "EMP-007",
+            "department": "Operations",
             "date": datetime.now(timezone.utc).isoformat(),
             "check_in": datetime.now(timezone.utc).replace(hour=8, minute=0).isoformat(),
             "check_out": datetime.now(timezone.utc).replace(hour=17, minute=0).isoformat(),
             "hours_worked": 8.0,
             "overtime_hours": 1.0,
-            "notes": "Regular work day with 1 hour overtime"
+            "notes": "Regular work day with overtime"
         }
         
-        success, data = self.make_request('POST', 'attendance', attendance_data, 200)
-        self.log_result("Create Attendance Record", success,
-                       f"Employee: {data.get('employee_name', 'Unknown')}" if success else data.get('error', ''))
+        # Expected permissions - All roles should have access to attendance
+        expected_success_all = list(self.test_users.keys())
         
-        if success:
-            self.test_data['attendance_id'] = data.get('id')
-            
-            # Test get all attendance records
-            success, data = self.make_request('GET', 'attendance')
-            self.log_result("Get All Attendance Records", success,
-                           f"Count: {len(data) if isinstance(data, list) else 'Unknown'}" if success else data.get('error', ''))
+        # Test GET /api/attendance
+        for username in self.test_users.keys():
+            if username not in self.user_tokens:
+                continue
+                
+            success, data = self.make_request('GET', 'attendance', token=self.user_tokens[username])
+            self.log_result(f"Attendance GET - {username} ({self.test_users[username]['role']})", 
+                           success, f"✓ Access granted" if success else f"✗ Should have access: {data.get('error', '')}")
+        
+        # Test POST /api/attendance - All roles should be able to create attendance
+        for username in expected_success_all:
+            if username not in self.user_tokens:
+                continue
+                
+            success, data = self.make_request('POST', 'attendance', attendance_data, 
+                                            token=self.user_tokens[username])
+            self.log_result(f"Attendance POST - {username} ({self.test_users[username]['role']})", 
+                           success, f"Created attendance: {data.get('id', 'Unknown')}" if success else data.get('error', ''))
     
-    def test_dashboard_analytics(self):
-        """Test dashboard analytics endpoint"""
-        print("\n📊 Testing Dashboard Analytics...")
+    def test_dashboard_permissions(self):
+        """Test dashboard stats endpoint permissions for all roles"""
+        print("\n📊 Testing Dashboard Permissions...")
         
-        if not self.token:
-            self.log_result("Dashboard Tests", False, "No authentication token available")
-            return
+        # Expected permissions - All roles except guard should have dashboard access
+        expected_success = ["owner_ali", "manager_mohammad", "accountant_fatima", "foreman_ahmed", "driver_khalid"]
+        expected_fail = ["guard_omar"]
         
-        # Test dashboard stats
-        success, data = self.make_request('GET', 'dashboard/stats')
-        self.log_result("Dashboard Statistics", success,
-                       f"Equipment Count: {data.get('equipment_count', 'Unknown')}" if success else data.get('error', ''))
-        
-        if success:
-            # Validate dashboard data structure
-            required_keys = ['production', 'expenses', 'equipment_count', 'invoices', 'month']
-            missing_keys = [key for key in required_keys if key not in data]
+        # Test GET /api/dashboard/stats
+        for username in self.test_users.keys():
+            if username not in self.user_tokens:
+                continue
+                
+            success, data = self.make_request('GET', 'dashboard/stats', token=self.user_tokens[username])
             
-            if not missing_keys:
-                self.log_result("Dashboard Data Structure", True, "All required keys present")
+            if username in expected_success:
+                expected_status = success
+                result_msg = f"✓ Allowed access" if success else f"✗ Should have access: {data.get('error', '')}"
             else:
-                self.log_result("Dashboard Data Structure", False, f"Missing keys: {missing_keys}")
+                expected_status = not success
+                result_msg = f"✓ Correctly denied access" if not success else f"✗ Should be denied access"
+            
+            self.log_result(f"Dashboard GET - {username} ({self.test_users[username]['role']})", 
+                           expected_status, result_msg)
+            
+            # Validate dashboard data structure for successful requests
+            if success and username in expected_success:
+                required_keys = ['production', 'expenses', 'equipment_count', 'invoices', 'month']
+                missing_keys = [key for key in required_keys if key not in data]
+                
+                if not missing_keys:
+                    self.log_result(f"Dashboard Data Structure - {username}", True, "All required keys present")
+                else:
+                    self.log_result(f"Dashboard Data Structure - {username}", False, f"Missing keys: {missing_keys}")
     
     def run_all_tests(self):
         """Run comprehensive test suite"""
