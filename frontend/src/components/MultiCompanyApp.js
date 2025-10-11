@@ -450,6 +450,17 @@ const DashboardLayout = ({ children }) => {
   const [showCompanySwitcher, setShowCompanySwitcher] = useState(false);
   const navigate = useNavigate();
 
+  // Close company switcher when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (showCompanySwitcher && !event.target.closest('.company-switcher-container')) {
+        setShowCompanySwitcher(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [showCompanySwitcher]);
+
   // Define all menu items with their required permissions
   const allMenuItems = [
     { path: '/dashboard', label: 'لوحة التحكم', icon: '📊', resource: 'dashboard', action: 'read' },
