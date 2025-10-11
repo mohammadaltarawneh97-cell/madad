@@ -475,6 +475,16 @@ const DashboardLayout = ({ children }) => {
     navigate('/login');
   };
 
+  const handleSwitchCompany = async (companyId) => {
+    const result = await switchCompany(companyId);
+    if (result.success) {
+      setShowCompanySwitcher(false);
+      window.location.reload(); // Refresh to load new company data
+    } else {
+      alert(result.error || 'Failed to switch company');
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gray-50 flex" dir="rtl">
       {/* Sidebar */}
