@@ -414,6 +414,9 @@ async def get_expenses(user: User = Depends(get_current_user)):
 # Invoices routes (company-specific)
 @api_router.post("/invoices", response_model=Invoice)
 async def create_invoice(invoice_data: InvoiceCreate, user: User = Depends(get_current_user)):
+    if not user.has_permission("invoices", "create"):
+        raise HTTPException(status_code=403, detail="You don't have permission to create invoices")
+    
     if not hasattr(user, 'current_company_id') or not user.current_company_id:
         raise HTTPException(status_code=400, detail="No company context")
     
