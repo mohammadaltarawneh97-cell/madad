@@ -471,6 +471,9 @@ async def create_attendance(attendance_data: AttendanceCreate, user: User = Depe
 
 @api_router.get("/attendance", response_model=List[Attendance])
 async def get_attendance(user: User = Depends(get_current_user)):
+    if not user.has_permission("attendance", "read"):
+        raise HTTPException(status_code=403, detail="You don't have permission to view attendance records")
+    
     if not hasattr(user, 'current_company_id') or not user.current_company_id:
         raise HTTPException(status_code=400, detail="No company context")
     
