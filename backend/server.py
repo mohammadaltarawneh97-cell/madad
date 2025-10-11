@@ -341,6 +341,9 @@ async def get_equipment(user: User = Depends(get_current_user)):
 # Production routes (company-specific)
 @api_router.post("/production", response_model=Production)
 async def create_production(production_data: ProductionCreate, user: User = Depends(get_current_user)):
+    if not user.has_permission("production", "create"):
+        raise HTTPException(status_code=403, detail="You don't have permission to create production records")
+    
     if not hasattr(user, 'current_company_id') or not user.current_company_id:
         raise HTTPException(status_code=400, detail="No company context")
     
