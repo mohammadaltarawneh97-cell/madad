@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-Comprehensive Backend API Testing for Khairat Al Ardh Operations Management System
-Tests all endpoints including authentication, equipment, production, expenses, invoices, attendance, and dashboard analytics.
+RBAC Backend API Testing for Khairat Al Ardh Operations Management System
+Tests Role-Based Access Control with 7 different roles and their specific permissions.
 """
 
 import requests
@@ -10,15 +10,25 @@ import json
 from datetime import datetime, timezone
 from typing import Dict, Any, Optional
 
-class KhairatAPITester:
+class RBACAPITester:
     def __init__(self, base_url: str = "https://agriman.preview.emergentagent.com"):
         self.base_url = base_url
         self.api_url = f"{base_url}/api"
-        self.token = None
         self.tests_run = 0
         self.tests_passed = 0
         self.failed_tests = []
-        self.test_data = {}
+        self.user_tokens = {}
+        self.company_id = None
+        
+        # Test users with different roles (all passwords: password123)
+        self.test_users = {
+            "owner_ali": {"role": "owner", "full_name": "علي المالك"},
+            "manager_mohammad": {"role": "manager", "full_name": "محمد المدير"},
+            "accountant_fatima": {"role": "accountant", "full_name": "فاطمة المحاسبة"},
+            "foreman_ahmed": {"role": "foreman", "full_name": "أحمد المشرف"},
+            "driver_khalid": {"role": "driver", "full_name": "خالد السائق"},
+            "guard_omar": {"role": "guard", "full_name": "عمر الحارس"}
+        }
         
     def log_result(self, test_name: str, success: bool, details: str = ""):
         """Log test results"""
