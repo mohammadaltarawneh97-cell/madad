@@ -158,7 +158,7 @@ async def create_company(company_data: CompanyCreate, user: User = Depends(get_c
 @api_router.get("/companies", response_model=List[Company])
 async def list_companies(user: User = Depends(get_current_user)):
     """List companies (Super admin sees all, users see their companies)"""
-    if user.is_super_admin:
+    if user.role == UserRole.SUPERADMIN:
         companies_list = await db.companies.find({}, {"_id": 0}).to_list(1000)
     else:
         # Users see only companies they have access to
