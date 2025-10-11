@@ -88,6 +88,34 @@ function App() {
               </DashboardLayout>
             </ProtectedRoute>
           } />
+          <Route path="/projects" element={
+            <ProtectedRoute>
+              <DashboardLayout>
+                <ProjectManagement />
+              </DashboardLayout>
+            </ProtectedRoute>
+          } />
+          <Route path="/feasibility-studies" element={
+            <ProtectedRoute>
+              <DashboardLayout>
+                <FeasibilityStudyTracker />
+              </DashboardLayout>
+            </ProtectedRoute>
+          } />
+          <Route path="/investments" element={
+            <ProtectedRoute>
+              <DashboardLayout>
+                <InvestmentDashboard />
+              </DashboardLayout>
+            </ProtectedRoute>
+          } />
+          <Route path="/financial-projections" element={
+            <ProtectedRoute>
+              <DashboardLayout>
+                <FinancialProjections />
+              </DashboardLayout>
+            </ProtectedRoute>
+          } />
         </Routes>
       </BrowserRouter>
     </AppProvider>
