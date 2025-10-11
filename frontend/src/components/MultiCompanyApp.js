@@ -445,8 +445,9 @@ const Login = () => {
 
 // Enhanced Dashboard Layout with Company Context
 const DashboardLayout = ({ children }) => {
-  const { user, currentCompany, permissions, userRole, logout } = useApp();
+  const { user, currentCompany, companies, permissions, userRole, logout, switchCompany } = useApp();
   const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [showCompanySwitcher, setShowCompanySwitcher] = useState(false);
   const navigate = useNavigate();
 
   // Define all menu items with their required permissions
