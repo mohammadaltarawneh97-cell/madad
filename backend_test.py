@@ -308,38 +308,65 @@ class RBACAPITester:
             self.log_result(f"Expenses POST Denied - {username} ({self.test_users[username]['role']})", 
                            success, "✓ Correctly denied access" if success else f"✗ Should be denied: {data.get('error', '')}")
     
-    def test_invoice_management(self):
-        """Test invoice CRUD operations"""
-        print("\n📄 Testing Invoice Management...")
+    def test_invoices_permissions(self):
+        """Test invoices endpoint permissions for all roles"""
+        print("\n📄 Testing Invoices Permissions...")
         
-        if not self.token:
-            self.log_result("Invoice Tests", False, "No authentication token available")
-            return
-        
-        # Test create invoice
+        # Invoice test data
         invoice_data = {
             "date": datetime.now(timezone.utc).isoformat(),
-            "invoice_number": f"INV-{datetime.now().strftime('%Y%m%d')}-001",
+            "invoice_number": f"INV-{datetime.now().strftime('%Y%m%d%H%M%S')}",
             "type": "SCREENING",
-            "client_name": "ABC Construction Company",
+            "client_name": "Al Rajhi Construction Company",
             "amount": 25000.00,
             "quantity": 1000.0,
             "unit_price": 25.0,
             "status": "PENDING",
-            "notes": "Screening services for project ABC"
+            "notes": "Screening services for construction project"
         }
         
-        success, data = self.make_request('POST', 'invoices', invoice_data, 200)
-        self.log_result("Create Invoice", success,
-                       f"Invoice Number: {data.get('invoice_number', 'Unknown')}" if success else data.get('error', ''))
+        # Expected permissions
+        expected_get_success = ["owner_ali", "manager_mohammad", "accountant_fatima", "foreman_ahmed"]
+        expected_get_fail = ["driver_khalid", "guard_omar"]
+        expected_post_success = ["owner_ali", "accountant_fatima"]
+        expected_post_fail = ["manager_mohammad", "foreman_ahmed", "driver_khalid", "guard_omar"]
         
-        if success:
-            self.test_data['invoice_id'] = data.get('id')
+        # Test GET /api/invoices
+        for username in self.test_users.keys():
+            if username not in self.user_tokens:
+                continue
+                
+            success, data = self.make_request('GET', 'invoices', token=self.user_tokens[username])
             
-            # Test get all invoices
-            success, data = self.make_request('GET', 'invoices')
-            self.log_result("Get All Invoices", success,
-                           f"Count: {len(data) if isinstance(data, list) else 'Unknown'}" if success else data.get('error', ''))
+            if username in expected_get_success:
+                expected_status = success
+                result_msg = f"✓ Allowed access" if success else f"✗ Should have access: {data.get('error', '')}"
+            else:
+                expected_status = not success
+                result_msg = f"✓ Correctly denied access" if not success else f"✗ Should be denied access"
+            
+            self.log_result(f"Invoices GET - {username} ({self.test_users[username]['role']})", 
+                           expected_status, result_msg)
+        
+        # Test POST /api/invoices (users who should succeed)
+        for username in expected_post_success:
+            if username not in self.user_tokens:
+                continue
+                
+            success, data = self.make_request('POST', 'invoices', invoice_data, 
+                                            token=self.user_tokens[username])
+            self.log_result(f"Invoices POST - {username} ({self.test_users[username]['role']})", 
+                           success, f"Created invoice: {data.get('invoice_number', 'Unknown')}" if success else data.get('error', ''))
+        
+        # Test POST /api/invoices (users who should fail)
+        for username in expected_post_fail:
+            if username not in self.user_tokens:
+                continue
+                
+            success, data = self.make_request('POST', 'invoices', invoice_data, 
+                                            expected_status=403, token=self.user_tokens[username])
+            self.log_result(f"Invoices POST Denied - {username} ({self.test_users[username]['role']})", 
+                           success, "✓ Correctly denied access" if success else f"✗ Should be denied: {data.get('error', '')}")
     
     def test_costing_centers(self):
         """Test costing centers management"""
