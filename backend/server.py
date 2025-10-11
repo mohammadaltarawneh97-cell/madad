@@ -490,6 +490,9 @@ async def get_attendance(user: User = Depends(get_current_user)):
 # Dashboard Analytics routes (company-specific)
 @api_router.get("/dashboard/stats")
 async def get_dashboard_stats(user: User = Depends(get_current_user)):
+    if not user.has_permission("dashboard", "read"):
+        raise HTTPException(status_code=403, detail="You don't have permission to view dashboard")
+    
     if not hasattr(user, 'current_company_id') or not user.current_company_id:
         raise HTTPException(status_code=400, detail="No company context")
     
