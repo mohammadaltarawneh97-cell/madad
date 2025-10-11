@@ -145,7 +145,7 @@ def require_role(allowed_roles: List[str]):
 @api_router.post("/companies", response_model=Company)
 async def create_company(company_data: CompanyCreate, user: User = Depends(get_current_user)):
     """Create a new company (Super admin only)"""
-    if not user.is_super_admin:
+    if user.role != UserRole.SUPERADMIN:
         raise HTTPException(status_code=403, detail="Super admin access required")
     
     company_obj = Company(**company_data.model_dump())
