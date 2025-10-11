@@ -487,6 +487,41 @@ async def get_attendance(user: User = Depends(get_current_user)):
     
     return attendance_list
 
+
+# Costing Centers routes (company-specific)
+@api_router.post("/costing-centers", response_model=CostingCenter)
+async def create_costing_center(center_data: CostingCenterCreate, user: User = Depends(get_current_user)):
+    if not user.has_permission("costing_centers", "create"):
+        raise HTTPException(status_code=403, detail="You don't have permission to create costing centers")
+    
+    if not hasattr(user, 'current_company_id') or not user.current_company_id:
+        raise HTTPException(status_code=400, detail="No company context")
+    
+    center_obj = CostingCenter(**center_data.model_dump(), company_id=user.current_company_id)
+    doc = center_obj.model_dump()
+    serialize_datetime(doc)
+    
+    await db.costing_centers.insert_one(doc)
+    return center_obj
+
+@api_router.get("/costing-centers", response_model=List[CostingCenter])
+async def get_costing_centers(user: User = Depends(get_current_user)):
+    if not user.has_permission("costing_centers", "read"):
+        raise HTTPException(status_code=403, detail="You don't have permission to view costing centers")
+    
+    if not hasattr(user, 'current_company_id') or not user.current_company_id:
+        raise HTTPException(status_code=400, detail="No company context")
+    
+    centers_list = await db.costing_centers.find(
+        {"company_id": user.current_company_id, "is_active": True}, 
+        {"_id": 0}
+    ).to_list(1000)
+    
+    for center in centers_list:
+        deserialize_datetime(center, ['created_at', 'updated_at'])
+    
+    return centers_list
+
 # Dashboard Analytics routes (company-specific)
 @api_router.get("/dashboard/stats")
 async def get_dashboard_stats(user: User = Depends(get_current_user)):
