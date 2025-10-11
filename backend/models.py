@@ -56,11 +56,10 @@ ROLE_PERMISSIONS = {
     },
     UserRole.ACCOUNTANT: {
         "users": ["read"],
-        "equipment": ["read"],
         "production": ["read"],
         "expenses": ["create", "read", "update", "delete"],
         "invoices": ["create", "read", "update", "delete"],
-        "attendance": ["read"],
+        "attendance": ["create", "read"],
         "costing_centers": ["read"],
         "dashboard": ["read"],
         "reports": ["read", "export"],
