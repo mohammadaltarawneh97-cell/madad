@@ -136,14 +136,6 @@ class ProductionCreate(BaseModel):
     notes: Optional[str] = None
 
 class Expense(CompanyBaseModel):
-    EXPENSE_CATEGORIES = [
-        ('FUEL', 'وقود'),
-        ('MAINTENANCE', 'صيانة'),
-        ('LABOR', 'عمالة'),
-        ('MATERIALS', 'مواد'),
-        ('ADMIN', 'إدارية'),
-        ('OTHER', 'أخرى'),
-    ]
     
     date: datetime
     category: str
