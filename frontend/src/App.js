@@ -20,6 +20,12 @@ import ExpenseManagement from './components/ExpenseManagement';
 import InvoiceManagement from './components/InvoiceManagement';
 import AttendanceManagement from './components/AttendanceManagement';
 
+// Import new project management components
+import ProjectManagement from './components/ProjectManagement';
+import FeasibilityStudyTracker from './components/FeasibilityStudyTracker';
+import InvestmentDashboard from './components/InvestmentDashboard';
+import FinancialProjections from './components/FinancialProjections';
+
 // Equipment Management Component (updated for multi-company)
 const EquipmentManagement = () => {
   return <div>Equipment management will be here</div>;
