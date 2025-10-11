@@ -380,6 +380,9 @@ async def get_production(user: User = Depends(get_current_user)):
 # Expenses routes (company-specific)
 @api_router.post("/expenses", response_model=Expense)
 async def create_expense(expense_data: ExpenseCreate, user: User = Depends(get_current_user)):
+    if not user.has_permission("expenses", "create"):
+        raise HTTPException(status_code=403, detail="You don't have permission to create expenses")
+    
     if not hasattr(user, 'current_company_id') or not user.current_company_id:
         raise HTTPException(status_code=400, detail="No company context")
     
