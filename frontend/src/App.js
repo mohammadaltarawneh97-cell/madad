@@ -702,10 +702,10 @@ import ExpenseManagement from './components/ExpenseManagement';
 import InvoiceManagement from './components/InvoiceManagement';
 import AttendanceManagement from './components/AttendanceManagement';
 
-// Main App Component
+// Main Multi-Company App Component
 function App() {
   return (
-    <AuthProvider>
+    <AppProvider>
       <BrowserRouter>
         <Routes>
           <Route path="/login" element={<Login />} />
@@ -714,6 +714,13 @@ function App() {
             <ProtectedRoute>
               <DashboardLayout>
                 <AdvancedDashboard />
+              </DashboardLayout>
+            </ProtectedRoute>
+          } />
+          <Route path="/companies" element={
+            <ProtectedRoute>
+              <DashboardLayout>
+                <CompanyManagement />
               </DashboardLayout>
             </ProtectedRoute>
           } />
@@ -754,7 +761,7 @@ function App() {
           } />
         </Routes>
       </BrowserRouter>
-    </AuthProvider>
+    </AppProvider>
   );
 }
 
