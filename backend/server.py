@@ -1022,4 +1022,115 @@ async def assign_driver_to_vehicle(vehicle_id: str, driver_id: str, user: User =
     
     return {"success": True, "message": "Driver assigned to vehicle"}
 
+
+
+# Department Management Routes
+@api_router.post("/departments", response_model=Department)
+async def create_department(dept_data: DepartmentCreate, user: User = Depends(get_current_user)):
+    if not user.has_permission("departments", "create"):
+        raise HTTPException(status_code=403, detail="You don't have permission to create departments")
+    
+    if not hasattr(user, 'current_company_id') or not user.current_company_id:
+        raise HTTPException(status_code=400, detail="No company context")
+    
+    dept_obj = Department(**dept_data.model_dump(), company_id=user.current_company_id)
+    doc = dept_obj.model_dump()
+    serialize_datetime(doc)
+    
+    await db.departments.insert_one(doc)
+    return dept_obj
+
+@api_router.get("/departments", response_model=List[Department])
+async def get_departments(user: User = Depends(get_current_user)):
+    if not user.has_permission("departments", "read"):
+        raise HTTPException(status_code=403, detail="You don't have permission to view departments")
+    
+    if not hasattr(user, 'current_company_id') or not user.current_company_id:
+        raise HTTPException(status_code=400, detail="No company context")
+    
+    departments_list = await db.departments.find(
+        {"company_id": user.current_company_id, "is_active": True}, 
+        {"_id": 0}
+    ).sort("level", 1).to_list(1000)
+    
+    for dept in departments_list:
+        deserialize_datetime(dept, ['created_at', 'updated_at'])
+    
+    return departments_list
+
+@api_router.get("/departments/tree")
+async def get_department_tree(user: User = Depends(get_current_user)):
+    """Get hierarchical department structure"""
+    if not user.has_permission("org_chart", "read"):
+        raise HTTPException(status_code=403, detail="You don't have permission to view org chart")
+    
+    if not hasattr(user, 'current_company_id') or not user.current_company_id:
+        raise HTTPException(status_code=400, detail="No company context")
+    
+    departments = await db.departments.find(
+        {"company_id": user.current_company_id, "is_active": True}, 
+        {"_id": 0}
+    ).to_list(1000)
+    
+    # Build tree structure
+    dept_dict = {dept['id']: dept for dept in departments}
+    tree = []
+    
+    for dept in departments:
+        dept['children'] = []
+        if dept.get('parent_department_id'):
+            parent = dept_dict.get(dept['parent_department_id'])
+            if parent:
+                if 'children' not in parent:
+                    parent['children'] = []
+                parent['children'].append(dept)
+        else:
+            tree.append(dept)
+    
+    return tree
+
+# Position Management Routes
+@api_router.post("/positions", response_model=Position)
+async def create_position(position_data: PositionCreate, user: User = Depends(get_current_user)):
+    if not user.has_permission("positions", "create"):
+        raise HTTPException(status_code=403, detail="You don't have permission to create positions")
+    
+    if not hasattr(user, 'current_company_id') or not user.current_company_id:
+        raise HTTPException(status_code=400, detail="No company context")
+    
+    # Get department name
+    dept = await db.departments.find_one({"id": position_data.department_id})
+    if not dept:
+        raise HTTPException(status_code=404, detail="Department not found")
+    
+    position_obj = Position(
+        **position_data.model_dump(), 
+        company_id=user.current_company_id,
+        department_name=dept['name_ar']
+    )
+    doc = position_obj.model_dump()
+    serialize_datetime(doc)
+    
+    await db.positions.insert_one(doc)
+    return position_obj
+
+@api_router.get("/positions", response_model=List[Position])
+async def get_positions(department_id: Optional[str] = None, user: User = Depends(get_current_user)):
+    if not user.has_permission("positions", "read"):
+        raise HTTPException(status_code=403, detail="You don't have permission to view positions")
+    
+    if not hasattr(user, 'current_company_id') or not user.current_company_id:
+        raise HTTPException(status_code=400, detail="No company context")
+    
+    query = {"company_id": user.current_company_id, "is_active": True}
+    if department_id:
+        query["department_id"] = department_id
+    
+    positions_list = await db.positions.find(query, {"_id": 0}).sort("level", 1).to_list(1000)
+    
+    for position in positions_list:
+        deserialize_datetime(position, ['created_at', 'updated_at'])
+    
+    return positions_list
+
     client.close()
