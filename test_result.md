@@ -316,11 +316,12 @@ metadata:
 
 test_plan:
   current_focus:
-    - "Backend permission validation for all endpoints"
-    - "Frontend role-based UI rendering"
-    - "Multi-role login and permission verification"
+    - "Role-Specific Dashboards - All 5 dashboards (Driver, Guard, Accountant, Foreman, Manager)"
+    - "Dashboard Routing Integration"
+    - "Frontend role-based dashboard rendering for all roles"
+    - "Data display validation per role permissions"
   stuck_tasks: []
-  test_all: true
+  test_all: false
   test_priority: "high_first"
 
 agent_communication:
