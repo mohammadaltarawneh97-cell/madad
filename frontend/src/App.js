@@ -44,7 +44,7 @@ function App() {
           <Route path="/dashboard" element={
             <ProtectedRoute>
               <DashboardLayout>
-                <AdvancedDashboard />
+                <RoleDashboard />
               </DashboardLayout>
             </ProtectedRoute>
           } />
