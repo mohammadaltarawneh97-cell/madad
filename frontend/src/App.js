@@ -8,7 +8,8 @@ import {
   ProtectedRoute, 
   DashboardLayout, 
   Login, 
-  CompanyManagement 
+  CompanyManagement,
+  useApp 
 } from "./components/MultiCompanyApp";
 
 // Import Advanced Dashboard
