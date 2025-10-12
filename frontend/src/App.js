@@ -26,6 +26,7 @@ import FeasibilityStudyTracker from './components/FeasibilityStudyTracker';
 import InvestmentDashboard from './components/InvestmentDashboard';
 import FinancialProjections from './components/FinancialProjections';
 import OrganizationalChart from './components/OrganizationalChart';
+import DriverDashboard from './components/DriverDashboard';
 
 // Equipment Management Component (updated for multi-company)
 const EquipmentManagement = () => {
