@@ -328,10 +328,9 @@ metadata:
 
 test_plan:
   current_focus:
-    - "Role-Specific Dashboards - All 5 dashboards (Driver, Guard, Accountant, Foreman, Manager)"
-    - "Dashboard Routing Integration"
-    - "Frontend role-based dashboard rendering for all roles"
-    - "Data display validation per role permissions"
+    - "Role-Specific Dashboards - Foreman (needs testing)"
+    - "Role-Specific Dashboards - Manager (needs testing)"
+    - "API 404 errors investigation (/api/employees/me, /api/salary-payments, /api/vehicles)"
   stuck_tasks: []
   test_all: false
   test_priority: "high_first"
