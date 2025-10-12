@@ -464,6 +464,7 @@ const DashboardLayout = ({ children }) => {
   // Define all menu items with their required permissions
   const allMenuItems = [
     { path: '/dashboard', label: 'لوحة التحكم', icon: '📊', resource: 'dashboard', action: 'read' },
+    { path: '/org-chart', label: 'الهيكل التنظيمي', icon: '🏛️', resource: 'org_chart', action: 'read' },
     { path: '/projects', label: 'المشاريع', icon: '🏗️', resource: 'projects', action: 'read' },
     { path: '/feasibility-studies', label: 'دراسات الجدوى', icon: '📋', resource: 'feasibility_studies', action: 'read' },
     { path: '/investments', label: 'الاستثمارات', icon: '💼', resource: 'investments', action: 'read' },
