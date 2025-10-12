@@ -582,9 +582,11 @@ class Employee(CompanyBaseModel):
     # Employment
     employment_status: EmploymentStatus = EmploymentStatus.ACTIVE
     contract_type: ContractType = ContractType.FULL_TIME
-    department: str
-    position: str
-    position_ar: str
+    department_id: str
+    department_name: str
+    position_id: Optional[str] = None
+    position_title: str
+    position_title_ar: str
     hire_date: datetime
     termination_date: Optional[datetime] = None
     
