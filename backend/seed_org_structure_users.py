@@ -20,12 +20,13 @@ async def seed_org_structure_users():
     """
     
     # Get the main company
-    company = await db.companies.find_one({"name": {"$regex": "silca", "$options": "i"}})
+    company = await db.companies.find_one({"name": {"$regex": "خيرات|silca", "$options": "i"}})
     if not company:
         print("❌ No company found. Please run seed_rbac_users.py first to create the company.")
         return
     
     company_id = company['id']
+    print(f"🏢 Using company: {company['name']} (ID: {company_id})")
     hashed_password = pwd_context.hash("password123")
     
     # Define all users based on organizational chart
