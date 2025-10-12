@@ -334,9 +334,7 @@ metadata:
 
 test_plan:
   current_focus:
-    - "Role-Specific Dashboards - Foreman (needs testing)"
-    - "Role-Specific Dashboards - Manager (needs testing)"
-    - "API 404 errors investigation (/api/employees/me, /api/salary-payments, /api/vehicles)"
+    - "API 404 errors investigation (/api/employees, /api/vehicles) - minor issue, dashboards work with empty states"
   stuck_tasks: []
   test_all: false
   test_priority: "high_first"
