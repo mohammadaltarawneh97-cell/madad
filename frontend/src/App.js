@@ -117,6 +117,13 @@ function App() {
               </DashboardLayout>
             </ProtectedRoute>
           } />
+          <Route path="/org-chart" element={
+            <ProtectedRoute>
+              <DashboardLayout>
+                <OrganizationalChart />
+              </DashboardLayout>
+            </ProtectedRoute>
+          } />
         </Routes>
       </BrowserRouter>
     </AppProvider>
