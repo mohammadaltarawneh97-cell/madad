@@ -706,3 +706,51 @@ class VehicleLocationUpdate(BaseModel):
     longitude: float
     address: Optional[str] = None
 
+
+# Organizational Structure Models
+class Department(CompanyBaseModel):
+    name: str
+    name_ar: str
+    code: str  # e.g., MKT, SLS, FIN
+    parent_department_id: Optional[str] = None  # For sub-departments
+    department_head_id: Optional[str] = None  # Employee ID
+    department_head_name: Optional[str] = None
+    level: int = 1  # 1=Main, 2=Sub, 3=Team, etc.
+    description: Optional[str] = None
+    description_ar: Optional[str] = None
+    budget: Optional[float] = None
+    employee_count: int = 0
+    is_active: bool = True
+
+class DepartmentCreate(BaseModel):
+    name: str
+    name_ar: str
+    code: str
+    parent_department_id: Optional[str] = None
+    level: Optional[int] = 1
+    description: Optional[str] = None
+    description_ar: Optional[str] = None
+
+class Position(CompanyBaseModel):
+    title: str
+    title_ar: str
+    department_id: str
+    department_name: Optional[str] = None
+    level: int = 1  # Seniority level
+    reports_to_position_id: Optional[str] = None  # Manager position
+    responsibilities: List[str] = Field(default_factory=list)
+    requirements: List[str] = Field(default_factory=list)
+    min_salary: Optional[float] = None
+    max_salary: Optional[float] = None
+    is_active: bool = True
+
+class PositionCreate(BaseModel):
+    title: str
+    title_ar: str
+    department_id: str
+    level: Optional[int] = 1
+    reports_to_position_id: Optional[str] = None
+    responsibilities: Optional[List[str]] = Field(default_factory=list)
+    requirements: Optional[List[str]] = Field(default_factory=list)
+
+
