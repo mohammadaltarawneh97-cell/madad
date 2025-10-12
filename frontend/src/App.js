@@ -27,18 +27,40 @@ import FeasibilityStudyTracker from './components/FeasibilityStudyTracker';
 import InvestmentDashboard from './components/InvestmentDashboard';
 import FinancialProjections from './components/FinancialProjections';
 import OrganizationalChart from './components/OrganizationalChart';
+
+// Import role-specific dashboards
 import DriverDashboard from './components/DriverDashboard';
+import GuardDashboard from './components/GuardDashboard';
+import AccountantDashboard from './components/AccountantDashboard';
+import ForemanDashboard from './components/ForemanDashboard';
+import ManagerDashboard from './components/ManagerDashboard';
 
 // Role-based Dashboard Component
 const RoleDashboard = () => {
   const { userRole } = useApp();
   
-  // Drivers get their own restricted dashboard
+  // Each role gets their own restricted dashboard
   if (userRole === 'driver') {
     return <DriverDashboard />;
   }
   
-  // Everyone else gets the advanced dashboard
+  if (userRole === 'guard') {
+    return <GuardDashboard />;
+  }
+  
+  if (userRole === 'accountant') {
+    return <AccountantDashboard />;
+  }
+  
+  if (userRole === 'foreman') {
+    return <ForemanDashboard />;
+  }
+  
+  if (userRole === 'manager') {
+    return <ManagerDashboard />;
+  }
+  
+  // Owner and SuperAdmin get the advanced dashboard with full access
   return <AdvancedDashboard />;
 };
 
