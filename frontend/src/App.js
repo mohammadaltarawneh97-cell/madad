@@ -25,6 +25,7 @@ import ProjectManagement from './components/ProjectManagement';
 import FeasibilityStudyTracker from './components/FeasibilityStudyTracker';
 import InvestmentDashboard from './components/InvestmentDashboard';
 import FinancialProjections from './components/FinancialProjections';
+import OrganizationalChart from './components/OrganizationalChart';
 
 // Equipment Management Component (updated for multi-company)
 const EquipmentManagement = () => {
