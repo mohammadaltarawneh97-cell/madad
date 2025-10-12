@@ -28,6 +28,19 @@ import FinancialProjections from './components/FinancialProjections';
 import OrganizationalChart from './components/OrganizationalChart';
 import DriverDashboard from './components/DriverDashboard';
 
+// Role-based Dashboard Component
+const RoleDashboard = () => {
+  const { userRole } = useApp();
+  
+  // Drivers get their own restricted dashboard
+  if (userRole === 'driver') {
+    return <DriverDashboard />;
+  }
+  
+  // Everyone else gets the advanced dashboard
+  return <AdvancedDashboard />;
+};
+
 // Equipment Management Component (updated for multi-company)
 const EquipmentManagement = () => {
   return <div>Equipment management will be here</div>;
