@@ -2074,6 +2074,7 @@ PROD-003,Another Product,furniture,500.00,400.00"""
             "batch_name": "Monthly Vendor Payments",
             "batch_date": datetime.now(timezone.utc).isoformat(),
             "payment_method": "bank_transfer",
+            "payment_type": "vendor_payment",  # Added missing field
             "bank_account_id": "test-bank-001",
             "payments": [
                 {
