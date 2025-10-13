@@ -74,7 +74,7 @@ async def create_task(
         raise HTTPException(status_code=403, detail="You don't have permission to create tasks")
     
     # Generate task number
-    task_number = await get_next_number(current_user.company_id, "TASK", "tasks")
+    task_number = await get_next_number(current_user.current_company_id, "TASK", "tasks")
     
     # Get assigned user name
     assigned_user = await db.users.find_one({"id": task.assigned_to})
