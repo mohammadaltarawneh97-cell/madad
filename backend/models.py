@@ -138,6 +138,13 @@ ROLE_PERMISSIONS = {
         "currencies": ["read"],
         "exchange_rates": ["read"],
         "financial_reports": ["read", "generate", "export"],
+        # CRM Modules - Manager has full CRM access
+        "leads": ["create", "read", "update", "delete", "convert"],
+        "crm_accounts": ["create", "read", "update", "delete"],
+        "crm_contacts": ["create", "read", "update", "delete"],
+        "opportunities": ["create", "read", "update", "delete"],
+        "cases": ["create", "read", "update", "delete"],
+        "campaigns": ["create", "read", "update", "delete"],
         "dashboard": ["read"],
         "reports": ["read", "export"],
     },
