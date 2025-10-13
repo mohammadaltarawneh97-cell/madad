@@ -951,11 +951,345 @@ class ComprehensiveAPITester:
             else:
                 self.log_result("Driver Denied Accounting Access", False, "Driver should be denied access")
 
+    def test_enhanced_accounting_bank_accounts(self):
+        """Test Bank Accounts functionality"""
+        print("\n🏦 Testing Bank Accounts...")
+        
+        if "accountant_fatima" not in self.user_tokens:
+            self.log_result("Bank Accounts - No Token", False, "accountant_fatima not authenticated")
+            return None
+        
+        token = self.user_tokens["accountant_fatima"]
+        
+        # Create bank account
+        bank_account_data = {
+            "account_number": "SA1234567890",
+            "account_name": "Main Operating Account",
+            "account_name_ar": "الحساب التشغيلي الرئيسي",
+            "account_type": "checking",
+            "bank_name": "Al Rajhi Bank",
+            "bank_name_ar": "مصرف الراجحي",
+            "currency": "SAR",
+            "opening_balance": 100000.00,
+            "gl_account_id": "test-gl-001"
+        }
+        
+        success, bank_response = self.make_request('POST', 'accounting/bank-accounts', bank_account_data, token=token)
+        if success:
+            bank_account_id = bank_response.get('id')
+            account_name = bank_response.get('account_name')
+            opening_balance = bank_response.get('opening_balance')
+            self.log_result("Create Bank Account", True, f"Account '{account_name}' created with balance: {opening_balance}")
+            
+            # Get bank accounts
+            success, data = self.make_request('GET', 'accounting/bank-accounts', token=token)
+            if success:
+                accounts_count = len(data)
+                self.log_result("Get Bank Accounts", True, f"Retrieved {accounts_count} bank accounts")
+            else:
+                self.log_result("Get Bank Accounts", False, data.get('error', ''))
+            
+            return bank_account_id
+        else:
+            self.log_result("Create Bank Account", False, bank_response.get('error', ''))
+            return None
+
+    def test_enhanced_accounting_bank_statements(self, bank_account_id):
+        """Test Bank Statements functionality"""
+        print("\n📄 Testing Bank Statements...")
+        
+        if "accountant_fatima" not in self.user_tokens:
+            self.log_result("Bank Statements - No Token", False, "accountant_fatima not authenticated")
+            return None
+        
+        if not bank_account_id:
+            self.log_result("Bank Statements - No Bank Account", False, "Need bank account for testing")
+            return None
+        
+        token = self.user_tokens["accountant_fatima"]
+        
+        # Create bank statement
+        statement_data = {
+            "bank_account_id": bank_account_id,
+            "statement_date": datetime.now(timezone.utc).isoformat(),
+            "from_date": (datetime.now(timezone.utc) - timedelta(days=30)).isoformat(),
+            "to_date": datetime.now(timezone.utc).isoformat(),
+            "opening_balance": 100000.00,
+            "closing_balance": 105000.00,
+            "lines": [
+                {
+                    "transaction_date": datetime.now(timezone.utc).isoformat(),
+                    "description": "Customer payment received",
+                    "reference": "TXN001",
+                    "debit": 5000.00,
+                    "credit": 0.00,
+                    "balance": 105000.00
+                }
+            ]
+        }
+        
+        success, statement_response = self.make_request('POST', 'accounting/bank-statements', statement_data, token=token)
+        if success:
+            statement_id = statement_response.get('id')
+            statement_number = statement_response.get('statement_number')
+            closing_balance = statement_response.get('closing_balance')
+            self.log_result("Create Bank Statement", True, f"Statement {statement_number} created, Closing Balance: {closing_balance}")
+            
+            # Get bank statements
+            success, data = self.make_request('GET', 'accounting/bank-statements', token=token)
+            if success:
+                statements_count = len(data)
+                self.log_result("Get Bank Statements", True, f"Retrieved {statements_count} bank statements")
+            else:
+                self.log_result("Get Bank Statements", False, data.get('error', ''))
+            
+            return statement_id
+        else:
+            self.log_result("Create Bank Statement", False, statement_response.get('error', ''))
+            return None
+
+    def test_enhanced_accounting_bank_reconciliation(self, statement_id):
+        """Test Bank Reconciliation functionality"""
+        print("\n🔄 Testing Bank Reconciliation...")
+        
+        if "accountant_fatima" not in self.user_tokens:
+            self.log_result("Bank Reconciliation - No Token", False, "accountant_fatima not authenticated")
+            return
+        
+        if not statement_id:
+            self.log_result("Bank Reconciliation - No Statement", False, "Need bank statement for testing")
+            return
+        
+        token = self.user_tokens["accountant_fatima"]
+        
+        # Create bank reconciliation
+        success, recon_response = self.make_request('POST', f'accounting/bank-reconciliations?statement_id={statement_id}', token=token)
+        if success:
+            recon_id = recon_response.get('id')
+            recon_number = recon_response.get('reconciliation_number')
+            difference = recon_response.get('difference')
+            self.log_result("Create Bank Reconciliation", True, f"Reconciliation {recon_number} created, Difference: {difference}")
+            
+            # Get bank reconciliations
+            success, data = self.make_request('GET', 'accounting/bank-reconciliations', token=token)
+            if success:
+                recons_count = len(data)
+                self.log_result("Get Bank Reconciliations", True, f"Retrieved {recons_count} reconciliations")
+            else:
+                self.log_result("Get Bank Reconciliations", False, data.get('error', ''))
+            
+            # Complete reconciliation (test with Owner role for approve permission)
+            if "owner_ali" in self.user_tokens and recon_id:
+                owner_token = self.user_tokens["owner_ali"]
+                success, complete_data = self.make_request('POST', f'accounting/bank-reconciliations/{recon_id}/complete', token=owner_token)
+                if success:
+                    self.log_result("Complete Bank Reconciliation", True, "Reconciliation completed successfully")
+                else:
+                    self.log_result("Complete Bank Reconciliation", False, complete_data.get('error', ''))
+        else:
+            self.log_result("Create Bank Reconciliation", False, recon_response.get('error', ''))
+
+    def test_enhanced_accounting_expense_claims(self):
+        """Test Expense Claims functionality"""
+        print("\n💳 Testing Expense Claims...")
+        
+        if "accountant_fatima" not in self.user_tokens:
+            self.log_result("Expense Claims - No Token", False, "accountant_fatima not authenticated")
+            return None
+        
+        token = self.user_tokens["accountant_fatima"]
+        
+        # Create expense claim
+        expense_claim_data = {
+            "claim_date": datetime.now(timezone.utc).isoformat(),
+            "employee_id": "emp-001",
+            "lines": [
+                {
+                    "line_number": 1,
+                    "expense_date": datetime.now(timezone.utc).isoformat(),
+                    "expense_category": "travel",
+                    "description": "Business trip to Riyadh",
+                    "amount": 1500.00,
+                    "tax_amount": 225.00,
+                    "receipt_attached": True
+                },
+                {
+                    "line_number": 2,
+                    "expense_date": datetime.now(timezone.utc).isoformat(),
+                    "expense_category": "meals",
+                    "description": "Client dinner",
+                    "amount": 300.00,
+                    "tax_amount": 45.00,
+                    "receipt_attached": True
+                }
+            ],
+            "notes": "Monthly expense claim"
+        }
+        
+        success, claim_response = self.make_request('POST', 'accounting/expense-claims', expense_claim_data, token=token)
+        if success:
+            claim_id = claim_response.get('id')
+            claim_number = claim_response.get('claim_number')
+            net_amount = claim_response.get('net_amount')
+            self.log_result("Create Expense Claim", True, f"Claim {claim_number} created, Net Amount: {net_amount}")
+            
+            # Get expense claims
+            success, data = self.make_request('GET', 'accounting/expense-claims', token=token)
+            if success:
+                claims_count = len(data)
+                self.log_result("Get Expense Claims", True, f"Retrieved {claims_count} expense claims")
+            else:
+                self.log_result("Get Expense Claims", False, data.get('error', ''))
+            
+            # Submit expense claim
+            if claim_id:
+                success, submit_data = self.make_request('POST', f'accounting/expense-claims/{claim_id}/submit', token=token)
+                if success:
+                    self.log_result("Submit Expense Claim", True, "Claim submitted for approval")
+                    
+                    # Approve expense claim (test with Manager role)
+                    if "manager_mohammad" in self.user_tokens:
+                        manager_token = self.user_tokens["manager_mohammad"]
+                        success, approve_data = self.make_request('POST', f'accounting/expense-claims/{claim_id}/approve', token=manager_token)
+                        if success:
+                            self.log_result("Approve Expense Claim", True, "Claim approved successfully")
+                        else:
+                            self.log_result("Approve Expense Claim", False, approve_data.get('error', ''))
+                else:
+                    self.log_result("Submit Expense Claim", False, submit_data.get('error', ''))
+            
+            return claim_id
+        else:
+            self.log_result("Create Expense Claim", False, claim_response.get('error', ''))
+            return None
+
+    def test_enhanced_accounting_budgets(self):
+        """Test Budget Management functionality"""
+        print("\n📊 Testing Budget Management...")
+        
+        if "accountant_fatima" not in self.user_tokens:
+            self.log_result("Budgets - No Token", False, "accountant_fatima not authenticated")
+            return None
+        
+        token = self.user_tokens["accountant_fatima"]
+        
+        # Create budget
+        budget_data = {
+            "budget_name": "Annual Operations Budget 2025",
+            "budget_name_ar": "ميزانية العمليات السنوية 2025",
+            "budget_type": "annual",
+            "fiscal_year": 2025,
+            "start_date": "2025-01-01T00:00:00Z",
+            "end_date": "2025-12-31T23:59:59Z",
+            "lines": [
+                {
+                    "account_id": "acc-001",
+                    "account_code": "5000",
+                    "account_name": "Office Expenses",
+                    "budgeted_amount": 120000.00,
+                    "actual_amount": 0.00,
+                    "variance": 0.00,
+                    "variance_percentage": 0.00
+                },
+                {
+                    "account_id": "acc-002",
+                    "account_code": "5100",
+                    "account_name": "Travel Expenses",
+                    "budgeted_amount": 50000.00,
+                    "actual_amount": 0.00,
+                    "variance": 0.00,
+                    "variance_percentage": 0.00
+                }
+            ],
+            "notes": "Annual budget for operations department"
+        }
+        
+        success, budget_response = self.make_request('POST', 'accounting/budgets', budget_data, token=token)
+        if success:
+            budget_id = budget_response.get('id')
+            budget_number = budget_response.get('budget_number')
+            total_budget = budget_response.get('total_budget')
+            self.log_result("Create Budget", True, f"Budget {budget_number} created, Total: {total_budget}")
+            
+            # Get budgets
+            success, data = self.make_request('GET', 'accounting/budgets', token=token)
+            if success:
+                budgets_count = len(data)
+                self.log_result("Get Budgets", True, f"Retrieved {budgets_count} budgets")
+            else:
+                self.log_result("Get Budgets", False, data.get('error', ''))
+            
+            # Get specific budget
+            if budget_id:
+                success, budget_detail = self.make_request('GET', f'accounting/budgets/{budget_id}', token=token)
+                if success:
+                    budget_name = budget_detail.get('budget_name')
+                    self.log_result("Get Budget Detail", True, f"Retrieved budget: {budget_name}")
+                else:
+                    self.log_result("Get Budget Detail", False, budget_detail.get('error', ''))
+                
+                # Get budget vs actual report
+                success, vs_actual = self.make_request('GET', f'accounting/budgets/{budget_id}/vs-actual', token=token)
+                if success:
+                    total_budget = vs_actual.get('total_budget')
+                    total_actual = vs_actual.get('total_actual')
+                    self.log_result("Budget vs Actual Report", True, f"Budget: {total_budget}, Actual: {total_actual}")
+                else:
+                    self.log_result("Budget vs Actual Report", False, vs_actual.get('error', ''))
+                
+                # Approve budget (test with Owner role)
+                if "owner_ali" in self.user_tokens:
+                    owner_token = self.user_tokens["owner_ali"]
+                    success, approve_data = self.make_request('POST', f'accounting/budgets/{budget_id}/approve', token=owner_token)
+                    if success:
+                        self.log_result("Approve Budget", True, "Budget approved successfully")
+                    else:
+                        self.log_result("Approve Budget", False, approve_data.get('error', ''))
+            
+            return budget_id
+        else:
+            self.log_result("Create Budget", False, budget_response.get('error', ''))
+            return None
+
+    def test_enhanced_accounting_rbac_permissions(self):
+        """Test RBAC permissions for enhanced accounting endpoints"""
+        print("\n🔐 Testing Enhanced Accounting RBAC Permissions...")
+        
+        # Test Owner access (should have full access)
+        if "owner_ali" in self.user_tokens:
+            token = self.user_tokens["owner_ali"]
+            
+            success, data = self.make_request('GET', 'accounting/bank-accounts', token=token)
+            if success:
+                self.log_result("Owner Access Bank Accounts", True, "Owner has full access")
+            else:
+                self.log_result("Owner Access Bank Accounts", False, data.get('error', ''))
+        
+        # Test Accountant access (should have full access)
+        if "accountant_fatima" in self.user_tokens:
+            token = self.user_tokens["accountant_fatima"]
+            
+            success, data = self.make_request('GET', 'accounting/expense-claims', token=token)
+            if success:
+                self.log_result("Accountant Access Expense Claims", True, "Accountant has full access")
+            else:
+                self.log_result("Accountant Access Expense Claims", False, data.get('error', ''))
+        
+        # Test unauthorized access (Driver should get 403)
+        if "driver_khalid" in self.user_tokens:
+            token = self.user_tokens["driver_khalid"]
+            
+            success, data = self.make_request('GET', 'accounting/budgets', expected_status=403, token=token)
+            if success:  # success means we got expected 403
+                self.log_result("Driver Denied Enhanced Accounting", True, "Driver correctly denied access")
+            else:
+                self.log_result("Driver Denied Enhanced Accounting", False, "Driver should be denied access")
+
     def run_all_tests(self):
         """Run comprehensive test suite including RBAC and Accounting"""
         print("🚀 Starting Comprehensive Backend API Testing for Khairat Al Ardh Operations Management System")
         print("=" * 100)
-        print("Testing RBAC System + Oracle-like Accounting System")
+        print("Testing RBAC System + Oracle-like Accounting System + Enhanced Accounting Features")
         print("=" * 100)
         print("Testing 7 different roles with specific permissions:")
         for username, user_info in self.test_users.items():
@@ -981,6 +1315,18 @@ class ComprehensiveAPITester:
         self.test_accounting_exchange_rates()
         self.test_accounting_financial_reports()
         self.test_accounting_rbac_permissions()
+        
+        # Run Phase 1 Enhanced Accounting Features tests
+        print("\n" + "💎" * 50)
+        print("PHASE 1: ENHANCED ACCOUNTING FEATURES TESTING")
+        print("💎" * 50)
+        
+        bank_account_id = self.test_enhanced_accounting_bank_accounts()
+        statement_id = self.test_enhanced_accounting_bank_statements(bank_account_id)
+        self.test_enhanced_accounting_bank_reconciliation(statement_id)
+        self.test_enhanced_accounting_expense_claims()
+        self.test_enhanced_accounting_budgets()
+        self.test_enhanced_accounting_rbac_permissions()
         
         # Run remaining RBAC tests
         print("\n" + "🔐" * 50)
