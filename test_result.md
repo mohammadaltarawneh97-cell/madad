@@ -1127,11 +1127,11 @@ backend:
 
   - task: "Sales Forecasting Backend"
     implemented: true
-    working: "NA"
+    working: true
     file: "backend/crm_enhanced_routes.py"
     stuck_count: 0
     priority: "high"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
       - working: "NA"
         agent: "main"
@@ -1144,6 +1144,10 @@ backend:
           - Territory and region support
           - Opportunities linking
           - Automatic forecast numbering (FCST-000001)
+      - working: true
+        agent: "testing"
+        comment: |
+          ✅ SALES FORECASTING VERIFIED: Forecast creation working with automatic numbering (FCST-000001), fiscal year tracking (2025), forecast periods (quarterly), and forecast amounts (Pipeline: 500,000, Best Case: 400,000, Commit: 300,000, Most Likely: 350,000). Forecast filtering by fiscal year working correctly. All CRUD operations functional.
 
   - task: "Enhanced CRM Routes Integration"
     implemented: true
