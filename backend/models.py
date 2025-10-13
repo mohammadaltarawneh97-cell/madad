@@ -87,6 +87,7 @@ ROLE_PERMISSIONS = {
         "positions": ["create", "read", "update", "delete"],
         "org_chart": ["read"],
         # Accounting Modules
+        "accounting": ["read", "write", "approve"],  # Generic accounting permission
         "chart_of_accounts": ["create", "read", "update", "delete"],
         "journal_entries": ["create", "read", "update", "delete", "post", "reverse"],
         "vendors": ["create", "read", "update", "delete"],
