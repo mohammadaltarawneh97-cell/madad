@@ -153,7 +153,7 @@ async def get_task(
     
     task = await db.tasks.find_one({
         "id": task_id,
-        "company_id": current_user.company_id
+        "company_id": current_user.current_company_id
     })
     
     if not task:
@@ -278,7 +278,7 @@ async def create_product(
     
     # Check for duplicate product code
     existing = await db.crm_products.find_one({
-        "company_id": current_user.company_id,
+        "company_id": current_user.current_company_id,
         "product_code": product.product_code
     })
     if existing:
@@ -430,7 +430,7 @@ async def create_email_template(
     
     # Check for duplicate template code
     existing = await db.email_templates.find_one({
-        "company_id": current_user.company_id,
+        "company_id": current_user.current_company_id,
         "template_code": template.template_code
     })
     if existing:
@@ -605,7 +605,7 @@ async def get_forecast(
     
     forecast = await db.forecasts.find_one({
         "id": forecast_id,
-        "company_id": current_user.company_id
+        "company_id": current_user.current_company_id
     })
     
     if not forecast:
