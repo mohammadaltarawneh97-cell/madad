@@ -1421,11 +1421,11 @@ agent_communication:
 backend:
   - task: "File Upload/Download with MinIO"
     implemented: true
-    working: "NA"
+    working: true
     file: "backend/file_routes.py"
     stuck_count: 0
     priority: "high"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
       - working: "NA"
         agent: "main"
@@ -1440,14 +1440,18 @@ backend:
           - Related entity linking (expense_claim, contract, etc.)
           - Fallback to local filesystem if MinIO unavailable
           - Company-scoped file access
+      - working: true
+        agent: "testing"
+        comment: |
+          ✅ FILE UPLOAD/DOWNLOAD VERIFIED: File upload working with multipart form data, test file 'test_document.txt' uploaded successfully (69 bytes). File listing returns 1 file, metadata retrieval working correctly. File download returns exact content match with uploaded file. Soft delete functionality working - file marked as deleted successfully. MinIO fallback to local filesystem working properly.
 
   - task: "CSV Export for All Modules"
     implemented: true
-    working: "NA"
+    working: true
     file: "backend/csv_routes.py"
     stuck_count: 0
     priority: "high"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
       - working: "NA"
         agent: "main"
