@@ -172,6 +172,71 @@ function App() {
               </DashboardLayout>
             </ProtectedRoute>
           } />
+          
+          {/* Accounting Routes */}
+          <Route path="/accounting" element={
+            <ProtectedRoute>
+              <DashboardLayout>
+                <AccountingDashboard />
+              </DashboardLayout>
+            </ProtectedRoute>
+          } />
+          <Route path="/accounting/chart-of-accounts" element={
+            <ProtectedRoute>
+              <DashboardLayout>
+                <ChartOfAccounts />
+              </DashboardLayout>
+            </ProtectedRoute>
+          } />
+          <Route path="/accounting/general-ledger" element={
+            <ProtectedRoute>
+              <DashboardLayout>
+                <GeneralLedger />
+              </DashboardLayout>
+            </ProtectedRoute>
+          } />
+          <Route path="/accounting/vendors" element={
+            <ProtectedRoute>
+              <DashboardLayout>
+                <Vendors />
+              </DashboardLayout>
+            </ProtectedRoute>
+          } />
+          <Route path="/accounting/vendor-bills" element={
+            <ProtectedRoute>
+              <DashboardLayout>
+                <VendorBills />
+              </DashboardLayout>
+            </ProtectedRoute>
+          } />
+          <Route path="/accounting/customers" element={
+            <ProtectedRoute>
+              <DashboardLayout>
+                <Customers />
+              </DashboardLayout>
+            </ProtectedRoute>
+          } />
+          <Route path="/accounting/ar-invoices" element={
+            <ProtectedRoute>
+              <DashboardLayout>
+                <ARInvoices />
+              </DashboardLayout>
+            </ProtectedRoute>
+          } />
+          <Route path="/accounting/fixed-assets" element={
+            <ProtectedRoute>
+              <DashboardLayout>
+                <FixedAssets />
+              </DashboardLayout>
+            </ProtectedRoute>
+          } />
+          <Route path="/accounting/reports" element={
+            <ProtectedRoute>
+              <DashboardLayout>
+                <FinancialReports />
+              </DashboardLayout>
+            </ProtectedRoute>
+          } />
         </Routes>
       </BrowserRouter>
     </AppProvider>
