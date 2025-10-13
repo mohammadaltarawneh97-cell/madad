@@ -1,16 +1,16 @@
 #!/usr/bin/env python3
 """
-RBAC Backend API Testing for Khairat Al Ardh Operations Management System
-Tests Role-Based Access Control with 7 different roles and their specific permissions.
+Comprehensive Backend API Testing for Khairat Al Ardh Operations Management System
+Tests RBAC and Oracle-like Accounting System with comprehensive financial modules.
 """
 
 import requests
 import sys
 import json
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 from typing import Dict, Any, Optional
 
-class RBACAPITester:
+class ComprehensiveAPITester:
     def __init__(self, base_url: str = "https://company-dashboard-5.preview.emergentagent.com"):
         self.base_url = base_url
         self.api_url = f"{base_url}/api"
