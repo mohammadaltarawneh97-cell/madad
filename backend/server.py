@@ -838,6 +838,14 @@ app.include_router(accounting_enhanced_router)
 from crm_enhanced_routes import router as crm_enhanced_router
 app.include_router(crm_enhanced_router)
 
+# Import and include File Management routes
+from file_routes import router as file_router
+app.include_router(file_router)
+
+# Import and include CSV Import/Export routes
+from csv_routes import router as csv_router
+app.include_router(csv_router)
+
 # CORS middleware
 app.add_middleware(
     CORSMiddleware,
