@@ -302,6 +302,29 @@ function App() {
               </DashboardLayout>
             </ProtectedRoute>
           } />
+          
+          {/* Warehouse Routes */}
+          <Route path="/warehouse" element={
+            <ProtectedRoute>
+              <DashboardLayout>
+                <WarehouseDashboard />
+              </DashboardLayout>
+            </ProtectedRoute>
+          } />
+          <Route path="/warehouse/products" element={
+            <ProtectedRoute>
+              <DashboardLayout>
+                <Products />
+              </DashboardLayout>
+            </ProtectedRoute>
+          } />
+          <Route path="/warehouse/stock-balance" element={
+            <ProtectedRoute>
+              <DashboardLayout>
+                <StockBalance />
+              </DashboardLayout>
+            </ProtectedRoute>
+          } />
         </Routes>
       </BrowserRouter>
     </AppProvider>
