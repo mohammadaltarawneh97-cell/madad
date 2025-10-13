@@ -1034,11 +1034,11 @@ backend:
 
   - task: "CRM Activities Backend"
     implemented: true
-    working: "NA"
+    working: true
     file: "backend/crm_enhanced_routes.py"
     stuck_count: 0
     priority: "high"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
       - working: "NA"
         agent: "main"
@@ -1049,6 +1049,10 @@ backend:
           - Related record linking with automatic name resolution
           - Duration tracking
           - Automatic activity numbering (ACT-000001)
+      - working: true
+        agent: "testing"
+        comment: |
+          ✅ CRM ACTIVITIES VERIFIED: Activity creation working with automatic numbering (ACT-000001), activity types (call), duration tracking (30 minutes), and outcome recording. Activity filtering by type working correctly. All CRUD operations functional.
 
   - task: "CRM Products Backend"
     implemented: true
