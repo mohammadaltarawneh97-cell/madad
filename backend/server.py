@@ -92,6 +92,10 @@ async def get_user_company(user: User = Depends(get_current_user)):
             return Company(**company_doc)
     return None
 
+async def get_db():
+    """Get database connection"""
+    return db
+
 def serialize_datetime(obj):
     """Convert datetime objects to ISO strings for MongoDB storage"""
     if isinstance(obj, dict):
