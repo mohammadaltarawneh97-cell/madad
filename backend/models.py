@@ -226,6 +226,13 @@ ROLE_PERMISSIONS = {
         "opportunities": ["read"],
         "cases": ["read"],
         "campaigns": ["read"],
+        # Enhanced CRM Modules - Read-only access
+        "tasks": ["read"],
+        "activities": ["read"],
+        "contracts": ["read"],
+        "email_templates": ["read"],
+        "emails": ["read"],
+        "forecasts": ["read"],
         "dashboard": ["read"],
         "reports": ["read", "export"],
     },
