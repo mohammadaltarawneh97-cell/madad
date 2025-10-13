@@ -671,4 +671,4 @@ const CompanyManagement = () => (
   </div>
 );
 
-export { AppProvider, ProtectedRoute, DashboardLayout, Login, CompanyManagement, useApp };
+export { AppProvider, ProtectedRoute, DashboardLayout, Login, CompanyManagement, useApp, AppContext };
