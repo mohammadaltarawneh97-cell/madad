@@ -614,3 +614,157 @@ async def get_payment_terms(
     ).to_list(length=None)
     
     return [PaymentTerm(**term) for term in terms]
+
+
+
+
+# ============================================================================
+# PAYMENT BATCH PROCESSING
+# ============================================================================
+
+@router.post("/payment-batches", response_model=PaymentBatch)
+async def create_payment_batch(
+    batch: PaymentBatchCreate,
+    current_user: User = Depends(get_current_user)
+):
+    """Create a new payment batch"""
+    if not current_user.has_permission("accounting", "write"):
+        raise HTTPException(status_code=403, detail="You don't have permission to create payment batches")
+    
+    # Generate batch number
+    batch_number = await get_next_number(current_user.current_company_id, "PBATCH", "payment_batches")
+    
+    # Calculate batch totals
+    total_amount = sum(payment.amount for payment in batch.payments)
+    payment_count = len(batch.payments)
+    
+    batch_data = PaymentBatch(
+        id=str(uuid.uuid4()),
+        company_id=current_user.current_company_id,
+        batch_number=batch_number,
+        **batch.dict(),
+        total_amount=total_amount,
+        payment_count=payment_count,
+        created_by=current_user.id,
+        created_at=datetime.now(timezone.utc)
+    )
+    
+    batch_dict = prepare_for_mongo(batch_data.dict())
+    await db.payment_batches.insert_one(batch_dict)
+    
+    return batch_data
+
+
+@router.get("/payment-batches", response_model=List[PaymentBatch])
+async def get_payment_batches(
+    status: Optional[PaymentStatus] = None,
+    current_user: User = Depends(get_current_user)
+):
+    """Get all payment batches"""
+    if not current_user.has_permission("accounting", "read"):
+        raise HTTPException(status_code=403, detail="You don't have permission to view payment batches")
+    
+    query = {"company_id": current_user.current_company_id}
+    if status:
+        query["status"] = status.value
+    
+    batches = await db.payment_batches.find(query).to_list(length=None)
+    
+    return [PaymentBatch(**batch) for batch in batches]
+
+
+@router.get("/payment-batches/{batch_id}", response_model=PaymentBatch)
+async def get_payment_batch(
+    batch_id: str,
+    current_user: User = Depends(get_current_user)
+):
+    """Get a specific payment batch"""
+    if not current_user.has_permission("accounting", "read"):
+        raise HTTPException(status_code=403, detail="You don't have permission to view payment batches")
+    
+    batch = await db.payment_batches.find_one({
+        "id": batch_id,
+        "company_id": current_user.current_company_id
+    })
+    
+    if not batch:
+        raise HTTPException(status_code=404, detail="Payment batch not found")
+    
+    return PaymentBatch(**batch)
+
+
+@router.post("/payment-batches/{batch_id}/process")
+async def process_payment_batch(
+    batch_id: str,
+    current_user: User = Depends(get_current_user)
+):
+    """Process a payment batch"""
+    if not current_user.has_permission("accounting", "approve"):
+        raise HTTPException(status_code=403, detail="You don't have permission to process payment batches")
+    
+    result = await db.payment_batches.update_one(
+        {"id": batch_id, "company_id": current_user.current_company_id, "status": PaymentStatus.PENDING.value},
+        {
+            "$set": {
+                "status": PaymentStatus.PROCESSING.value,
+                "processed_date": datetime.now(timezone.utc).isoformat(),
+                "processed_by": current_user.id
+            }
+        }
+    )
+    
+    if result.matched_count == 0:
+        raise HTTPException(status_code=404, detail="Payment batch not found or already processed")
+    
+    return {"message": "Payment batch processing started"}
+
+
+@router.post("/payment-batches/{batch_id}/complete")
+async def complete_payment_batch(
+    batch_id: str,
+    current_user: User = Depends(get_current_user)
+):
+    """Mark payment batch as completed"""
+    if not current_user.has_permission("accounting", "approve"):
+        raise HTTPException(status_code=403, detail="You don't have permission to complete payment batches")
+    
+    result = await db.payment_batches.update_one(
+        {"id": batch_id, "company_id": current_user.current_company_id, "status": PaymentStatus.PROCESSING.value},
+        {
+            "$set": {
+                "status": PaymentStatus.COMPLETED.value,
+                "completed_date": datetime.now(timezone.utc).isoformat()
+            }
+        }
+    )
+    
+    if result.matched_count == 0:
+        raise HTTPException(status_code=404, detail="Payment batch not found or not in processing status")
+    
+    return {"message": "Payment batch completed successfully"}
+
+
+@router.post("/payment-batches/{batch_id}/fail")
+async def fail_payment_batch(
+    batch_id: str,
+    error_message: str,
+    current_user: User = Depends(get_current_user)
+):
+    """Mark payment batch as failed"""
+    if not current_user.has_permission("accounting", "approve"):
+        raise HTTPException(status_code=403, detail="You don't have permission to update payment batches")
+    
+    result = await db.payment_batches.update_one(
+        {"id": batch_id, "company_id": current_user.current_company_id},
+        {
+            "$set": {
+                "status": PaymentStatus.FAILED.value,
+                "error_message": error_message
+            }
+        }
+    )
+    
+    if result.matched_count == 0:
+        raise HTTPException(status_code=404, detail="Payment batch not found")
+    
+    return {"message": "Payment batch marked as failed"}
