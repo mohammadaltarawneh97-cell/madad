@@ -141,323 +141,454 @@ function App() {
           <Route path="/" element={<Navigate to="/dashboard" replace />} />
           <Route path="/dashboard" element={
             <ProtectedRoute>
-              <DashboardLayout>
+              <NewShell>
                 <RoleDashboard />
-              </DashboardLayout>
+              </NewShell>
             </ProtectedRoute>
           } />
           <Route path="/companies" element={
             <ProtectedRoute>
-              <DashboardLayout>
+              <NewShell>
                 <CompanyManagement />
-              </DashboardLayout>
+              </NewShell>
+            </ProtectedRoute>
+          } />
+          
+          {/* Production Routes */}
+          <Route path="/production" element={
+            <ProtectedRoute>
+              <NewShell>
+                <Production />
+              </NewShell>
             </ProtectedRoute>
           } />
           <Route path="/equipment" element={
             <ProtectedRoute>
-              <DashboardLayout>
-                <EquipmentManagement />
-              </DashboardLayout>
+              <NewShell>
+                <EquipmentPage />
+              </NewShell>
             </ProtectedRoute>
           } />
-          <Route path="/production" element={
+          <Route path="/costing-centers" element={
             <ProtectedRoute>
-              <DashboardLayout>
-                <ProductionManagement />
-              </DashboardLayout>
+              <NewShell>
+                <CostingCenters />
+              </NewShell>
             </ProtectedRoute>
           } />
-          <Route path="/expenses" element={
-            <ProtectedRoute>
-              <DashboardLayout>
-                <ExpenseManagement />
-              </DashboardLayout>
-            </ProtectedRoute>
-          } />
+          
+          {/* Invoice Routes */}
           <Route path="/invoices" element={
             <ProtectedRoute>
-              <DashboardLayout>
+              <NewShell>
                 <InvoiceManagement />
-              </DashboardLayout>
+              </NewShell>
             </ProtectedRoute>
           } />
+          <Route path="/invoices/screening" element={
+            <ProtectedRoute>
+              <NewShell>
+                <InvoiceScreening />
+              </NewShell>
+            </ProtectedRoute>
+          } />
+          <Route path="/invoices/feeding" element={
+            <ProtectedRoute>
+              <NewShell>
+                <InvoiceFeeding />
+              </NewShell>
+            </ProtectedRoute>
+          } />
+          <Route path="/invoices/crushing" element={
+            <ProtectedRoute>
+              <NewShell>
+                <InvoiceCrushing />
+              </NewShell>
+            </ProtectedRoute>
+          } />
+          <Route path="/invoices/hauling" element={
+            <ProtectedRoute>
+              <NewShell>
+                <InvoiceHauling />
+              </NewShell>
+            </ProtectedRoute>
+          } />
+          
+          {/* Expense Routes */}
+          <Route path="/expenses" element={
+            <ProtectedRoute>
+              <NewShell>
+                <ExpenseManagement />
+              </NewShell>
+            </ProtectedRoute>
+          } />
+          <Route path="/expenses/fuel" element={
+            <ProtectedRoute>
+              <NewShell>
+                <ExpenseFuel />
+              </NewShell>
+            </ProtectedRoute>
+          } />
+          <Route path="/expenses/oil" element={
+            <ProtectedRoute>
+              <NewShell>
+                <ExpenseOil />
+              </NewShell>
+            </ProtectedRoute>
+          } />
+          <Route path="/expenses/grease" element={
+            <ProtectedRoute>
+              <NewShell>
+                <ExpenseGrease />
+              </NewShell>
+            </ProtectedRoute>
+          } />
+          <Route path="/expenses/spare-parts" element={
+            <ProtectedRoute>
+              <NewShell>
+                <ExpenseSpareParts />
+              </NewShell>
+            </ProtectedRoute>
+          } />
+          <Route path="/expenses/salaries" element={
+            <ProtectedRoute>
+              <NewShell>
+                <ExpenseSalaries />
+              </NewShell>
+            </ProtectedRoute>
+          } />
+          <Route path="/expenses/others" element={
+            <ProtectedRoute>
+              <NewShell>
+                <ExpenseOthers />
+              </NewShell>
+            </ProtectedRoute>
+          } />
+          
+          {/* Compliance Routes */}
+          <Route path="/compliance/licenses" element={
+            <ProtectedRoute>
+              <NewShell>
+                <ComplianceLicenses />
+              </NewShell>
+            </ProtectedRoute>
+          } />
+          <Route path="/compliance/insurance" element={
+            <ProtectedRoute>
+              <NewShell>
+                <ComplianceInsurance />
+              </NewShell>
+            </ProtectedRoute>
+          } />
+          <Route path="/compliance/certificates" element={
+            <ProtectedRoute>
+              <NewShell>
+                <ComplianceCertificates />
+              </NewShell>
+            </ProtectedRoute>
+          } />
+          
+          {/* Document Routes */}
+          <Route path="/mou" element={
+            <ProtectedRoute>
+              <NewShell>
+                <MOUPage />
+              </NewShell>
+            </ProtectedRoute>
+          } />
+          <Route path="/financials" element={
+            <ProtectedRoute>
+              <NewShell>
+                <FinancialsPage />
+              </NewShell>
+            </ProtectedRoute>
+          } />
+          <Route path="/hse" element={
+            <ProtectedRoute>
+              <NewShell>
+                <HSEPage />
+              </NewShell>
+            </ProtectedRoute>
+          } />
+          
+          {/* Legacy Routes */}
           <Route path="/attendance" element={
             <ProtectedRoute>
-              <DashboardLayout>
+              <NewShell>
                 <AttendanceManagement />
-              </DashboardLayout>
+              </NewShell>
             </ProtectedRoute>
           } />
           <Route path="/projects" element={
             <ProtectedRoute>
-              <DashboardLayout>
+              <NewShell>
                 <ProjectManagement />
-              </DashboardLayout>
+              </NewShell>
             </ProtectedRoute>
           } />
           <Route path="/feasibility-studies" element={
             <ProtectedRoute>
-              <DashboardLayout>
+              <NewShell>
                 <FeasibilityStudyTracker />
-              </DashboardLayout>
+              </NewShell>
             </ProtectedRoute>
           } />
           <Route path="/investments" element={
             <ProtectedRoute>
-              <DashboardLayout>
+              <NewShell>
                 <InvestmentDashboard />
-              </DashboardLayout>
+              </NewShell>
             </ProtectedRoute>
           } />
           <Route path="/financial-projections" element={
             <ProtectedRoute>
-              <DashboardLayout>
+              <NewShell>
                 <FinancialProjections />
-              </DashboardLayout>
+              </NewShell>
             </ProtectedRoute>
           } />
           <Route path="/org-chart" element={
             <ProtectedRoute>
-              <DashboardLayout>
+              <NewShell>
                 <OrganizationalChart />
-              </DashboardLayout>
+              </NewShell>
             </ProtectedRoute>
           } />
           
           {/* Accounting Routes */}
           <Route path="/accounting" element={
             <ProtectedRoute>
-              <DashboardLayout>
+              <NewShell>
                 <AccountingDashboard />
-              </DashboardLayout>
+              </NewShell>
             </ProtectedRoute>
           } />
           <Route path="/accounting/chart-of-accounts" element={
             <ProtectedRoute>
-              <DashboardLayout>
+              <NewShell>
                 <ChartOfAccounts />
-              </DashboardLayout>
+              </NewShell>
             </ProtectedRoute>
           } />
           <Route path="/accounting/general-ledger" element={
             <ProtectedRoute>
-              <DashboardLayout>
+              <NewShell>
                 <GeneralLedger />
-              </DashboardLayout>
+              </NewShell>
             </ProtectedRoute>
           } />
           <Route path="/accounting/vendors" element={
             <ProtectedRoute>
-              <DashboardLayout>
+              <NewShell>
                 <Vendors />
-              </DashboardLayout>
+              </NewShell>
             </ProtectedRoute>
           } />
           <Route path="/accounting/vendor-bills" element={
             <ProtectedRoute>
-              <DashboardLayout>
+              <NewShell>
                 <VendorBills />
-              </DashboardLayout>
+              </NewShell>
             </ProtectedRoute>
           } />
           <Route path="/accounting/customers" element={
             <ProtectedRoute>
-              <DashboardLayout>
+              <NewShell>
                 <Customers />
-              </DashboardLayout>
+              </NewShell>
             </ProtectedRoute>
           } />
           <Route path="/accounting/ar-invoices" element={
             <ProtectedRoute>
-              <DashboardLayout>
+              <NewShell>
                 <ARInvoices />
-              </DashboardLayout>
+              </NewShell>
             </ProtectedRoute>
           } />
           <Route path="/accounting/fixed-assets" element={
             <ProtectedRoute>
-              <DashboardLayout>
+              <NewShell>
                 <FixedAssets />
-              </DashboardLayout>
+              </NewShell>
             </ProtectedRoute>
           } />
           <Route path="/accounting/reports" element={
             <ProtectedRoute>
-              <DashboardLayout>
+              <NewShell>
                 <FinancialReports />
-              </DashboardLayout>
+              </NewShell>
             </ProtectedRoute>
           } />
           <Route path="/accounting/bank-reconciliation" element={
             <ProtectedRoute>
-              <DashboardLayout>
+              <NewShell>
                 <BankReconciliation />
-              </DashboardLayout>
+              </NewShell>
             </ProtectedRoute>
           } />
           <Route path="/accounting/expense-claims" element={
             <ProtectedRoute>
-              <DashboardLayout>
+              <NewShell>
                 <ExpenseClaims />
-              </DashboardLayout>
+              </NewShell>
             </ProtectedRoute>
           } />
           <Route path="/accounting/budgets" element={
             <ProtectedRoute>
-              <DashboardLayout>
+              <NewShell>
                 <Budgets />
-              </DashboardLayout>
+              </NewShell>
             </ProtectedRoute>
           } />
           <Route path="/accounting/payment-batches" element={
             <ProtectedRoute>
-              <DashboardLayout>
+              <NewShell>
                 <PaymentBatches />
-              </DashboardLayout>
+              </NewShell>
             </ProtectedRoute>
           } />
           
           {/* CRM Routes */}
           <Route path="/crm" element={
             <ProtectedRoute>
-              <DashboardLayout>
+              <NewShell>
                 <CRMDashboard />
-              </DashboardLayout>
+              </NewShell>
             </ProtectedRoute>
           } />
           <Route path="/crm/leads" element={
             <ProtectedRoute>
-              <DashboardLayout>
+              <NewShell>
                 <Leads />
-              </DashboardLayout>
+              </NewShell>
             </ProtectedRoute>
           } />
           <Route path="/crm/accounts" element={
             <ProtectedRoute>
-              <DashboardLayout>
+              <NewShell>
                 <Accounts />
-              </DashboardLayout>
+              </NewShell>
             </ProtectedRoute>
           } />
           <Route path="/crm/contacts" element={
             <ProtectedRoute>
-              <DashboardLayout>
+              <NewShell>
                 <Contacts />
-              </DashboardLayout>
+              </NewShell>
             </ProtectedRoute>
           } />
           <Route path="/crm/opportunities" element={
             <ProtectedRoute>
-              <DashboardLayout>
+              <NewShell>
                 <Opportunities />
-              </DashboardLayout>
+              </NewShell>
             </ProtectedRoute>
           } />
           <Route path="/crm/cases" element={
             <ProtectedRoute>
-              <DashboardLayout>
+              <NewShell>
                 <Cases />
-              </DashboardLayout>
+              </NewShell>
             </ProtectedRoute>
           } />
           <Route path="/crm/campaigns" element={
             <ProtectedRoute>
-              <DashboardLayout>
+              <NewShell>
                 <Campaigns />
-              </DashboardLayout>
+              </NewShell>
             </ProtectedRoute>
           } />
           <Route path="/crm/tasks" element={
             <ProtectedRoute>
-              <DashboardLayout>
+              <NewShell>
                 <Tasks />
-              </DashboardLayout>
+              </NewShell>
             </ProtectedRoute>
           } />
           <Route path="/crm/activities" element={
             <ProtectedRoute>
-              <DashboardLayout>
+              <NewShell>
                 <Activities />
-              </DashboardLayout>
+              </NewShell>
             </ProtectedRoute>
           } />
           <Route path="/crm/products" element={
             <ProtectedRoute>
-              <DashboardLayout>
+              <NewShell>
                 <CRMProducts />
-              </DashboardLayout>
+              </NewShell>
             </ProtectedRoute>
           } />
           <Route path="/crm/contracts" element={
             <ProtectedRoute>
-              <DashboardLayout>
+              <NewShell>
                 <Contracts />
-              </DashboardLayout>
+              </NewShell>
             </ProtectedRoute>
           } />
           <Route path="/crm/email-templates" element={
             <ProtectedRoute>
-              <DashboardLayout>
+              <NewShell>
                 <EmailTemplates />
-              </DashboardLayout>
+              </NewShell>
             </ProtectedRoute>
           } />
           <Route path="/crm/forecasting" element={
             <ProtectedRoute>
-              <DashboardLayout>
+              <NewShell>
                 <Forecasting />
-              </DashboardLayout>
+              </NewShell>
             </ProtectedRoute>
           } />
           
           {/* Warehouse Routes */}
           <Route path="/warehouse" element={
             <ProtectedRoute>
-              <DashboardLayout>
+              <NewShell>
                 <WarehouseDashboard />
-              </DashboardLayout>
+              </NewShell>
             </ProtectedRoute>
           } />
           <Route path="/warehouse/products" element={
             <ProtectedRoute>
-              <DashboardLayout>
+              <NewShell>
                 <Products />
-              </DashboardLayout>
+              </NewShell>
             </ProtectedRoute>
           } />
           <Route path="/warehouse/stock-balance" element={
             <ProtectedRoute>
-              <DashboardLayout>
+              <NewShell>
                 <StockBalance />
-              </DashboardLayout>
+              </NewShell>
             </ProtectedRoute>
           } />
           <Route path="/warehouse/warehouses" element={
             <ProtectedRoute>
-              <DashboardLayout>
+              <NewShell>
                 <Warehouses />
-              </DashboardLayout>
+              </NewShell>
             </ProtectedRoute>
           } />
           <Route path="/warehouse/stock-movements" element={
             <ProtectedRoute>
-              <DashboardLayout>
+              <NewShell>
                 <StockMovements />
-              </DashboardLayout>
+              </NewShell>
             </ProtectedRoute>
           } />
           <Route path="/warehouse/purchase-orders" element={
             <ProtectedRoute>
-              <DashboardLayout>
+              <NewShell>
                 <PurchaseOrders />
-              </DashboardLayout>
+              </NewShell>
             </ProtectedRoute>
           } />
           <Route path="/warehouse/inventory-transfers" element={
             <ProtectedRoute>
-              <DashboardLayout>
+              <NewShell>
                 <InventoryTransfers />
-              </DashboardLayout>
+              </NewShell>
             </ProtectedRoute>
           } />
         </Routes>
