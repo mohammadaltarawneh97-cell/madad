@@ -333,7 +333,7 @@ async def create_contract(
         raise HTTPException(status_code=403, detail="You don't have permission to create contracts")
     
     # Generate contract number
-    contract_number = await get_next_number(current_user.company_id, "CONT", "contracts")
+    contract_number = await get_next_number(current_user.current_company_id, "CONT", "contracts")
     
     # Get account name
     account = await db.accounts.find_one({"id": contract.account_id})
