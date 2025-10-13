@@ -632,7 +632,7 @@ async def create_payment_batch(
         raise HTTPException(status_code=403, detail="You don't have permission to create payment batches")
     
     # Generate batch number
-    batch_number = await get_next_number(current_user.current_company_id, "PBATCH", "payment_batches")
+    batch_number = await get_next_number(db, current_user.current_company_id, "PBATCH", "payment_batches")
     
     # Calculate batch totals
     total_amount = sum(payment.amount for payment in batch.payments)
