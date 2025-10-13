@@ -246,6 +246,57 @@ function App() {
               </DashboardLayout>
             </ProtectedRoute>
           } />
+          
+          {/* CRM Routes */}
+          <Route path="/crm" element={
+            <ProtectedRoute>
+              <DashboardLayout>
+                <CRMDashboard />
+              </DashboardLayout>
+            </ProtectedRoute>
+          } />
+          <Route path="/crm/leads" element={
+            <ProtectedRoute>
+              <DashboardLayout>
+                <Leads />
+              </DashboardLayout>
+            </ProtectedRoute>
+          } />
+          <Route path="/crm/accounts" element={
+            <ProtectedRoute>
+              <DashboardLayout>
+                <Accounts />
+              </DashboardLayout>
+            </ProtectedRoute>
+          } />
+          <Route path="/crm/contacts" element={
+            <ProtectedRoute>
+              <DashboardLayout>
+                <Contacts />
+              </DashboardLayout>
+            </ProtectedRoute>
+          } />
+          <Route path="/crm/opportunities" element={
+            <ProtectedRoute>
+              <DashboardLayout>
+                <Opportunities />
+              </DashboardLayout>
+            </ProtectedRoute>
+          } />
+          <Route path="/crm/cases" element={
+            <ProtectedRoute>
+              <DashboardLayout>
+                <Cases />
+              </DashboardLayout>
+            </ProtectedRoute>
+          } />
+          <Route path="/crm/campaigns" element={
+            <ProtectedRoute>
+              <DashboardLayout>
+                <Campaigns />
+              </DashboardLayout>
+            </ProtectedRoute>
+          } />
         </Routes>
       </BrowserRouter>
     </AppProvider>
