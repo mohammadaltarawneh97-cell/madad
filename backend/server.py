@@ -818,6 +818,10 @@ app.include_router(api_router)
 from accounting_routes import accounting_router
 app.include_router(accounting_router)
 
+# Import and include CRM routes
+from crm_routes import crm_router
+app.include_router(crm_router)
+
 # CORS middleware
 app.add_middleware(
     CORSMiddleware,
