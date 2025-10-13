@@ -203,7 +203,7 @@ async def create_activity(
         raise HTTPException(status_code=403, detail="You don't have permission to create activities")
     
     # Generate activity number
-    activity_number = await get_next_number(current_user.company_id, "ACT", "activities")
+    activity_number = await get_next_number(current_user.current_company_id, "ACT", "activities")
     
     # Get related record name
     collection_map = {
