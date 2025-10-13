@@ -93,7 +93,7 @@ Navigate to: **http://localhost:3001**
 ## 2️⃣ MAIN APPLICATION TESTING
 
 ### Access Information
-- **URL:** https://erp-khairit.preview.emergentagent.com
+- **URL:** https://digital-erp-hub.preview.emergentagent.com
 - **Port:** 3000 (local: http://localhost:3000)
 - **Tech:** React + FastAPI + MongoDB
 
@@ -114,7 +114,7 @@ Use these credentials (all passwords: `password123`):
 
 #### Test 1: Login & Dashboard
 ```bash
-1. Go to: https://erp-khairit.preview.emergentagent.com
+1. Go to: https://digital-erp-hub.preview.emergentagent.com
 2. Enter username: chairman_board
 3. Enter password: password123
 4. Click تسجيل الدخول (Login)
@@ -249,15 +249,15 @@ security_guard1      - Guard (حارس الأمن)
 ### Backend Health Check
 ```bash
 # Test backend is running
-curl https://erp-khairit.preview.emergentagent.com/
+curl https://digital-erp-hub.preview.emergentagent.com/
 
 # Test login endpoint
-curl -X POST https://erp-khairit.preview.emergentagent.com/api/login \
+curl -X POST https://digital-erp-hub.preview.emergentagent.com/api/login \
   -H "Content-Type: application/json" \
   -d '{"username":"chairman_board","password":"password123"}'
 
 # Test equipment API (requires auth)
-curl https://erp-khairit.preview.emergentagent.com/api/equipment
+curl https://digital-erp-hub.preview.emergentagent.com/api/equipment
 ```
 
 ### Database Check
