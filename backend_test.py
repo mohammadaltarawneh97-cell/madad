@@ -2251,7 +2251,7 @@ PROD-003,Another Product,furniture,500.00,400.00"""
         # RBAC - Test permission enforcement
         # Test with a restricted endpoint using driver credentials
         if "driver_khalid" in self.user_tokens:
-            success, data = self.make_request('GET', 'accounting/accounts', 
+            success, data = self.make_request('GET', 'accounting/chart-of-accounts', 
                                             expected_status=403, 
                                             token=self.user_tokens["driver_khalid"])
             self.log_result("RBAC Permission Check", success, 
