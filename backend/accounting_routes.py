@@ -326,18 +326,21 @@ async def create_vendor_bill(bill_data: VendorBillCreate, user: User = Depends(g
     # Calculate due date if not provided
     due_date = bill_data.due_date or (bill_data.bill_date + timedelta(days=bill_data.payment_terms_days or 30))
     
-    bill_obj = VendorBill(
-        **bill_data.model_dump(),
-        company_id=user.current_company_id,
-        bill_number=bill_number,
-        vendor_name=vendor['vendor_name'],
-        vendor_code=vendor['vendor_code'],
-        due_date=due_date,
-        subtotal=subtotal,
-        tax_amount=tax_amount,
-        total_amount=total_amount,
-        amount_due=total_amount
-    )
+    # Create bill data dict without due_date to avoid conflict
+    bill_dict = bill_data.model_dump()
+    bill_dict.update({
+        'company_id': user.current_company_id,
+        'bill_number': bill_number,
+        'vendor_name': vendor['vendor_name'],
+        'vendor_code': vendor['vendor_code'],
+        'due_date': due_date,
+        'subtotal': subtotal,
+        'tax_amount': tax_amount,
+        'total_amount': total_amount,
+        'amount_due': total_amount
+    })
+    
+    bill_obj = VendorBill(**bill_dict)
     
     doc = bill_obj.model_dump()
     serialize_datetime(doc)
