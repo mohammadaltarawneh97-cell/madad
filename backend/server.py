@@ -814,6 +814,10 @@ async def health_check():
 # Include router in app
 app.include_router(api_router)
 
+# Import and include accounting routes
+from accounting_routes import accounting_router
+app.include_router(accounting_router)
+
 # CORS middleware
 app.add_middleware(
     CORSMiddleware,
