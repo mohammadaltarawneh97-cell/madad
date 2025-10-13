@@ -76,6 +76,27 @@ import StockMovements from './components/warehouse/StockMovements';
 import PurchaseOrders from './components/warehouse/PurchaseOrders';
 import InventoryTransfers from './components/warehouse/InventoryTransfers';
 
+// Import new production-focused pages
+import Production from './pages/Production';
+import EquipmentPage from './pages/EquipmentPage';
+import CostingCenters from './pages/CostingCenters';
+import InvoiceScreening from './pages/InvoiceScreening';
+import InvoiceFeeding from './pages/InvoiceFeeding';
+import InvoiceCrushing from './pages/InvoiceCrushing';
+import InvoiceHauling from './pages/InvoiceHauling';
+import ExpenseFuel from './pages/ExpenseFuel';
+import ExpenseOil from './pages/ExpenseOil';
+import ExpenseGrease from './pages/ExpenseGrease';
+import ExpenseSpareParts from './pages/ExpenseSpareParts';
+import ExpenseSalaries from './pages/ExpenseSalaries';
+import ExpenseOthers from './pages/ExpenseOthers';
+import ComplianceLicenses from './pages/ComplianceLicenses';
+import ComplianceInsurance from './pages/ComplianceInsurance';
+import ComplianceCertificates from './pages/ComplianceCertificates';
+import MOUPage from './pages/MOUPage';
+import FinancialsPage from './pages/FinancialsPage';
+import HSEPage from './pages/HSEPage';
+
 // Role-based Dashboard Component
 const RoleDashboard = () => {
   const { userRole } = useApp();
