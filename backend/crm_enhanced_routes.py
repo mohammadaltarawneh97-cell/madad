@@ -348,7 +348,7 @@ async def create_contract(
     
     # Get owner name
     owner = await db.users.find_one({"id": contract.owner_id})
-    owner_name = owner['name'] if owner else "Unknown"
+    owner_name = owner['full_name'] if owner else "Unknown"
     
     contract_data = Contract(
         id=str(uuid.uuid4()),
