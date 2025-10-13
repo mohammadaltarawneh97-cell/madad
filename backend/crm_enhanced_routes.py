@@ -227,7 +227,7 @@ async def create_activity(
         activity_number=activity_number,
         related_to_name=related_to_name,
         owner_id=current_user.id,
-        owner_name=current_user.name,
+        owner_name=current_user.full_name,
         **activity.dict(),
         created_by=current_user.id,
         created_at=datetime.now(timezone.utc)
