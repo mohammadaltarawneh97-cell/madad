@@ -469,6 +469,7 @@ const DashboardLayout = ({ children }) => {
     { path: '/feasibility-studies', label: 'دراسات الجدوى', icon: '📋', resource: 'feasibility_studies', action: 'read' },
     { path: '/investments', label: 'الاستثمارات', icon: '💼', resource: 'investments', action: 'read' },
     { path: '/financial-projections', label: 'التوقعات المالية', icon: '📈', resource: 'financial_projections', action: 'read' },
+    { path: '/accounting', label: 'المحاسبة', icon: '🧮', resource: 'chart_of_accounts', action: 'read' },
     { path: '/equipment', label: 'المعدات', icon: '🚛', resource: 'equipment', action: 'read' },
     { path: '/production', label: 'الإنتاج', icon: '⚡', resource: 'production', action: 'read' },
     { path: '/expenses', label: 'المصروفات', icon: '💰', resource: 'expenses', action: 'read' },
