@@ -93,6 +93,13 @@ ROLE_PERMISSIONS = {
         "currencies": ["create", "read", "update", "delete"],
         "exchange_rates": ["create", "read", "update", "delete"],
         "financial_reports": ["read", "generate", "export"],
+        # CRM Modules
+        "leads": ["create", "read", "update", "delete", "convert"],
+        "crm_accounts": ["create", "read", "update", "delete"],
+        "crm_contacts": ["create", "read", "update", "delete"],
+        "opportunities": ["create", "read", "update", "delete"],
+        "cases": ["create", "read", "update", "delete"],
+        "campaigns": ["create", "read", "update", "delete"],
         "dashboard": ["read"],
         "reports": ["read", "export"],
     },
