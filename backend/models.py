@@ -174,6 +174,13 @@ ROLE_PERMISSIONS = {
         "currencies": ["create", "read", "update", "delete"],
         "exchange_rates": ["create", "read", "update", "delete"],
         "financial_reports": ["read", "generate", "export"],
+        # CRM Modules - Accountant has read-only CRM access
+        "leads": ["read"],
+        "crm_accounts": ["read"],
+        "crm_contacts": ["read"],
+        "opportunities": ["read"],
+        "cases": ["read"],
+        "campaigns": ["read"],
         "dashboard": ["read"],
         "reports": ["read", "export"],
     },
