@@ -2124,7 +2124,7 @@ PROD-003,Another Product,furniture,500.00,400.00"""
         print("🏦" * 50)
         
         # Chart of Accounts
-        success, data = self.make_request('GET', 'accounting/accounts', token=self.user_tokens["owner_ali"])
+        success, data = self.make_request('GET', 'accounting/chart-of-accounts', token=self.user_tokens["owner_ali"])
         self.log_result("Chart of Accounts", success, f"Retrieved {len(data) if success else 0} accounts")
         
         # Vendors
