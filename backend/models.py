@@ -184,6 +184,7 @@ ROLE_PERMISSIONS = {
         "financial_projections": ["create", "read", "update", "delete"],
         "documents": ["read"],
         # Accounting Modules - Accountant has full access to all accounting
+        "accounting": ["read", "write", "approve"],  # Generic accounting permission
         "chart_of_accounts": ["create", "read", "update", "delete"],
         "journal_entries": ["create", "read", "update", "delete", "post", "reverse"],
         "vendors": ["create", "read", "update", "delete"],
