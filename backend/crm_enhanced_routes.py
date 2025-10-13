@@ -399,7 +399,7 @@ async def activate_contract(
         raise HTTPException(status_code=403, detail="You don't have permission to activate contracts")
     
     result = await db.contracts.update_one(
-        {"id": contract_id, "company_id": current_user.company_id, "status": ContractStatus.DRAFT.value},
+        {"id": contract_id, "company_id": current_user.current_company_id, "status": ContractStatus.DRAFT.value},
         {
             "$set": {
                 "status": ContractStatus.ACTIVE.value,
