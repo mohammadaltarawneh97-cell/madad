@@ -78,7 +78,7 @@ async def create_task(
     
     # Get assigned user name
     assigned_user = await db.users.find_one({"id": task.assigned_to})
-    assigned_to_name = assigned_user['name'] if assigned_user else "Unknown"
+    assigned_to_name = assigned_user['full_name'] if assigned_user else "Unknown"
     
     # Get related record name if provided
     related_to_name = None
