@@ -172,9 +172,7 @@ async def get_bank_account(
 @router.post("/bank-statements", response_model=BankStatement)
 async def create_bank_statement(
     statement: BankStatementCreate,
-    current_user: User = Depends(get_current_user),
-    db: AsyncIOMotorDatabase = Depends(get_db),
-    _: bool = Depends(require_permission("accounting.write"))
+    current_user: User = Depends(get_current_user)
 ):
     """Upload a new bank statement"""
     # Get bank account
@@ -208,9 +206,7 @@ async def create_bank_statement(
 @router.get("/bank-statements", response_model=List[BankStatement])
 async def get_bank_statements(
     bank_account_id: Optional[str] = None,
-    current_user: User = Depends(get_current_user),
-    db: AsyncIOMotorDatabase = Depends(get_db),
-    _: bool = Depends(require_permission("accounting.read"))
+    current_user: User = Depends(get_current_user)
 ):
     """Get all bank statements for the company"""
     query = {"company_id": current_user.company_id}
@@ -229,9 +225,7 @@ async def get_bank_statements(
 @router.post("/bank-reconciliations", response_model=BankReconciliation)
 async def create_bank_reconciliation(
     statement_id: str,
-    current_user: User = Depends(get_current_user),
-    db: AsyncIOMotorDatabase = Depends(get_db),
-    _: bool = Depends(require_permission("accounting.write"))
+    current_user: User = Depends(get_current_user)
 ):
     """Create a new bank reconciliation from a statement"""
     # Get statement
@@ -271,9 +265,7 @@ async def create_bank_reconciliation(
 @router.get("/bank-reconciliations", response_model=List[BankReconciliation])
 async def get_bank_reconciliations(
     bank_account_id: Optional[str] = None,
-    current_user: User = Depends(get_current_user),
-    db: AsyncIOMotorDatabase = Depends(get_db),
-    _: bool = Depends(require_permission("accounting.read"))
+    current_user: User = Depends(get_current_user)
 ):
     """Get all bank reconciliations"""
     query = {"company_id": current_user.company_id}
@@ -288,9 +280,7 @@ async def get_bank_reconciliations(
 @router.post("/bank-reconciliations/{recon_id}/complete")
 async def complete_reconciliation(
     recon_id: str,
-    current_user: User = Depends(get_current_user),
-    db: AsyncIOMotorDatabase = Depends(get_db),
-    _: bool = Depends(require_permission("accounting.approve"))
+    current_user: User = Depends(get_current_user)
 ):
     """Mark reconciliation as complete"""
     result = await db.bank_reconciliations.update_one(
@@ -317,9 +307,7 @@ async def complete_reconciliation(
 @router.post("/expense-claims", response_model=ExpenseClaim)
 async def create_expense_claim(
     claim: ExpenseClaimCreate,
-    current_user: User = Depends(get_current_user),
-    db: AsyncIOMotorDatabase = Depends(get_db),
-    _: bool = Depends(require_permission("accounting.write"))
+    current_user: User = Depends(get_current_user)
 ):
     """Create a new expense claim"""
     # Generate claim number
@@ -357,9 +345,7 @@ async def create_expense_claim(
 async def get_expense_claims(
     employee_id: Optional[str] = None,
     status: Optional[ExpenseClaimStatus] = None,
-    current_user: User = Depends(get_current_user),
-    db: AsyncIOMotorDatabase = Depends(get_db),
-    _: bool = Depends(require_permission("accounting.read"))
+    current_user: User = Depends(get_current_user)
 ):
     """Get all expense claims"""
     query = {"company_id": current_user.company_id}
@@ -376,9 +362,7 @@ async def get_expense_claims(
 @router.get("/expense-claims/{claim_id}", response_model=ExpenseClaim)
 async def get_expense_claim(
     claim_id: str,
-    current_user: User = Depends(get_current_user),
-    db: AsyncIOMotorDatabase = Depends(get_db),
-    _: bool = Depends(require_permission("accounting.read"))
+    current_user: User = Depends(get_current_user)
 ):
     """Get a specific expense claim"""
     claim = await db.expense_claims.find_one({
@@ -395,9 +379,7 @@ async def get_expense_claim(
 @router.post("/expense-claims/{claim_id}/submit")
 async def submit_expense_claim(
     claim_id: str,
-    current_user: User = Depends(get_current_user),
-    db: AsyncIOMotorDatabase = Depends(get_db),
-    _: bool = Depends(require_permission("accounting.write"))
+    current_user: User = Depends(get_current_user)
 ):
     """Submit an expense claim for approval"""
     result = await db.expense_claims.update_one(
@@ -419,9 +401,7 @@ async def submit_expense_claim(
 @router.post("/expense-claims/{claim_id}/approve")
 async def approve_expense_claim(
     claim_id: str,
-    current_user: User = Depends(get_current_user),
-    db: AsyncIOMotorDatabase = Depends(get_db),
-    _: bool = Depends(require_permission("accounting.approve"))
+    current_user: User = Depends(get_current_user)
 ):
     """Approve an expense claim"""
     result = await db.expense_claims.update_one(
@@ -445,9 +425,7 @@ async def approve_expense_claim(
 async def reject_expense_claim(
     claim_id: str,
     reason: str,
-    current_user: User = Depends(get_current_user),
-    db: AsyncIOMotorDatabase = Depends(get_db),
-    _: bool = Depends(require_permission("accounting.approve"))
+    current_user: User = Depends(get_current_user)
 ):
     """Reject an expense claim"""
     result = await db.expense_claims.update_one(
@@ -475,9 +453,7 @@ async def reject_expense_claim(
 @router.post("/budgets", response_model=Budget)
 async def create_budget(
     budget: BudgetCreate,
-    current_user: User = Depends(get_current_user),
-    db: AsyncIOMotorDatabase = Depends(get_db),
-    _: bool = Depends(require_permission("accounting.write"))
+    current_user: User = Depends(get_current_user)
 ):
     """Create a new budget"""
     # Generate budget number
@@ -506,9 +482,7 @@ async def create_budget(
 async def get_budgets(
     fiscal_year: Optional[int] = None,
     department_id: Optional[str] = None,
-    current_user: User = Depends(get_current_user),
-    db: AsyncIOMotorDatabase = Depends(get_db),
-    _: bool = Depends(require_permission("accounting.read"))
+    current_user: User = Depends(get_current_user)
 ):
     """Get all budgets"""
     query = {"company_id": current_user.company_id}
@@ -525,9 +499,7 @@ async def get_budgets(
 @router.get("/budgets/{budget_id}", response_model=Budget)
 async def get_budget(
     budget_id: str,
-    current_user: User = Depends(get_current_user),
-    db: AsyncIOMotorDatabase = Depends(get_db),
-    _: bool = Depends(require_permission("accounting.read"))
+    current_user: User = Depends(get_current_user)
 ):
     """Get a specific budget"""
     budget = await db.budgets.find_one({
@@ -544,9 +516,7 @@ async def get_budget(
 @router.get("/budgets/{budget_id}/vs-actual", response_model=BudgetVsActual)
 async def get_budget_vs_actual(
     budget_id: str,
-    current_user: User = Depends(get_current_user),
-    db: AsyncIOMotorDatabase = Depends(get_db),
-    _: bool = Depends(require_permission("accounting.read"))
+    current_user: User = Depends(get_current_user)
 ):
     """Get budget vs actual analysis"""
     # Get budget
@@ -575,9 +545,7 @@ async def get_budget_vs_actual(
 @router.post("/budgets/{budget_id}/approve")
 async def approve_budget(
     budget_id: str,
-    current_user: User = Depends(get_current_user),
-    db: AsyncIOMotorDatabase = Depends(get_db),
-    _: bool = Depends(require_permission("accounting.approve"))
+    current_user: User = Depends(get_current_user)
 ):
     """Approve a budget"""
     result = await db.budgets.update_one(
@@ -604,9 +572,7 @@ async def approve_budget(
 @router.post("/payment-terms", response_model=PaymentTerm)
 async def create_payment_term(
     term: PaymentTermCreate,
-    current_user: User = Depends(get_current_user),
-    db: AsyncIOMotorDatabase = Depends(get_db),
-    _: bool = Depends(require_permission("accounting.write"))
+    current_user: User = Depends(get_current_user)
 ):
     """Create a new payment term"""
     term_data = PaymentTerm(
@@ -625,9 +591,7 @@ async def create_payment_term(
 
 @router.get("/payment-terms", response_model=List[PaymentTerm])
 async def get_payment_terms(
-    current_user: User = Depends(get_current_user),
-    db: AsyncIOMotorDatabase = Depends(get_db),
-    _: bool = Depends(require_permission("accounting.read"))
+    current_user: User = Depends(get_current_user)
 ):
     """Get all payment terms"""
     terms = await db.payment_terms.find(
