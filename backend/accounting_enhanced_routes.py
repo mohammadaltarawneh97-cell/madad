@@ -106,11 +106,15 @@ async def get_next_number(db: AsyncIOMotorDatabase, company_id: str, prefix: str
 @router.post("/bank-accounts", response_model=BankAccount)
 async def create_bank_account(
     account: BankAccountCreate,
-    current_user: User = Depends(get_current_user),
-    db: AsyncIOMotorDatabase = Depends(get_db),
-    _: bool = Depends(require_permission("accounting.write"))
+    current_user: User = Depends(get_current_user)
 ):
     """Create a new bank account"""
+    if not current_user.has_permission("accounting", "write"):
+        raise HTTPException(status_code=403, detail="You don't have permission to create bank accounts")
+    
+    if not hasattr(current_user, 'current_company_id') or not current_user.current_company_id:
+        raise HTTPException(status_code=400, detail="No company context")
+    
     account_data = BankAccount(
         id=str(uuid.uuid4()),
         company_id=current_user.company_id,
@@ -128,11 +132,12 @@ async def create_bank_account(
 
 @router.get("/bank-accounts", response_model=List[BankAccount])
 async def get_bank_accounts(
-    current_user: User = Depends(get_current_user),
-    db: AsyncIOMotorDatabase = Depends(get_db),
-    _: bool = Depends(require_permission("accounting.read"))
+    current_user: User = Depends(get_current_user)
 ):
     """Get all bank accounts for the company"""
+    if not current_user.has_permission("accounting", "read"):
+        raise HTTPException(status_code=403, detail="You don't have permission to view bank accounts")
+    
     accounts = await db.bank_accounts.find(
         {"company_id": current_user.company_id}
     ).to_list(length=None)
@@ -143,11 +148,12 @@ async def get_bank_accounts(
 @router.get("/bank-accounts/{account_id}", response_model=BankAccount)
 async def get_bank_account(
     account_id: str,
-    current_user: User = Depends(get_current_user),
-    db: AsyncIOMotorDatabase = Depends(get_db),
-    _: bool = Depends(require_permission("accounting.read"))
+    current_user: User = Depends(get_current_user)
 ):
     """Get a specific bank account"""
+    if not current_user.has_permission("accounting", "read"):
+        raise HTTPException(status_code=403, detail="You don't have permission to view bank accounts")
+    
     account = await db.bank_accounts.find_one({
         "id": account_id,
         "company_id": current_user.company_id
