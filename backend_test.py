@@ -2026,6 +2026,16 @@ PROD-003,Another Product,furniture,500.00,400.00"""
         self.test_crm_forecasts()
         self.test_crm_rbac_permissions()
         
+        # Run File Upload & CSV Import/Export tests
+        print("\n" + "📁" * 50)
+        print("FILE UPLOAD & CSV IMPORT/EXPORT TESTING")
+        print("📁" * 50)
+        
+        self.test_file_upload_download()
+        self.test_csv_export_endpoints()
+        self.test_csv_import_endpoints()
+        self.test_file_csv_rbac_permissions()
+        
         # Run remaining RBAC tests
         print("\n" + "🔐" * 50)
         print("RBAC SYSTEM TESTING")
