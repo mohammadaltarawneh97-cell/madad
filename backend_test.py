@@ -1676,10 +1676,10 @@ class ComprehensiveAPITester:
                 self.log_result("Accountant Denied CRM Task Creation", False, "Accountant should be denied write access")
 
     def run_all_tests(self):
-        """Run comprehensive test suite including RBAC and Accounting"""
+        """Run comprehensive test suite including RBAC, Accounting, and CRM"""
         print("🚀 Starting Comprehensive Backend API Testing for Khairat Al Ardh Operations Management System")
         print("=" * 100)
-        print("Testing RBAC System + Oracle-like Accounting System + Enhanced Accounting Features")
+        print("Testing RBAC System + Oracle-like Accounting System + Enhanced Accounting + Enhanced CRM Features")
         print("=" * 100)
         print("Testing 7 different roles with specific permissions:")
         for username, user_info in self.test_users.items():
