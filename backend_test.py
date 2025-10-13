@@ -1285,6 +1285,396 @@ class ComprehensiveAPITester:
             else:
                 self.log_result("Driver Denied Enhanced Accounting", False, "Driver should be denied access")
 
+    def test_crm_tasks(self):
+        """Test CRM Tasks functionality"""
+        print("\n📋 Testing CRM Tasks...")
+        
+        if "owner_ali" not in self.user_tokens:
+            self.log_result("CRM Tasks - No Token", False, "owner_ali not authenticated")
+            return None
+        
+        token = self.user_tokens["owner_ali"]
+        
+        # Create task
+        task_data = {
+            "subject": "Follow up with lead",
+            "description": "Call customer to discuss proposal",
+            "assigned_to": "owner_ali",
+            "related_to_type": "lead",
+            "related_to_id": "test-lead-001",
+            "due_date": "2025-02-01T00:00:00Z",
+            "priority": "high"
+        }
+        
+        success, task_response = self.make_request('POST', 'crm/tasks', task_data, token=token)
+        if success:
+            task_id = task_response.get('id')
+            task_number = task_response.get('task_number')
+            self.log_result("Create CRM Task", True, f"Task {task_number} created successfully")
+            
+            # Get tasks
+            success, data = self.make_request('GET', 'crm/tasks', token=token)
+            if success:
+                tasks_count = len(data)
+                self.log_result("Get CRM Tasks", True, f"Retrieved {tasks_count} tasks")
+            else:
+                self.log_result("Get CRM Tasks", False, data.get('error', ''))
+            
+            # Get specific task
+            if task_id:
+                success, task_detail = self.make_request('GET', f'crm/tasks/{task_id}', token=token)
+                if success:
+                    subject = task_detail.get('subject')
+                    self.log_result("Get CRM Task Detail", True, f"Retrieved task: {subject}")
+                else:
+                    self.log_result("Get CRM Task Detail", False, task_detail.get('error', ''))
+                
+                # Complete task
+                success, complete_data = self.make_request('POST', f'crm/tasks/{task_id}/complete?completion_notes=Task completed successfully', token=token)
+                if success:
+                    self.log_result("Complete CRM Task", True, "Task marked as completed")
+                else:
+                    self.log_result("Complete CRM Task", False, complete_data.get('error', ''))
+            
+            return task_id
+        else:
+            self.log_result("Create CRM Task", False, task_response.get('error', ''))
+            return None
+
+    def test_crm_activities(self):
+        """Test CRM Activities functionality"""
+        print("\n📞 Testing CRM Activities...")
+        
+        if "owner_ali" not in self.user_tokens:
+            self.log_result("CRM Activities - No Token", False, "owner_ali not authenticated")
+            return None
+        
+        token = self.user_tokens["owner_ali"]
+        
+        # Create activity
+        activity_data = {
+            "activity_type": "call",
+            "subject": "Sales call with prospect",
+            "description": "Discussed pricing and features",
+            "related_to_type": "lead",
+            "related_to_id": "test-lead-001",
+            "activity_date": "2025-01-15T10:00:00Z",
+            "duration_minutes": 30,
+            "outcome": "Positive response",
+            "next_step": "Send proposal"
+        }
+        
+        success, activity_response = self.make_request('POST', 'crm/activities', activity_data, token=token)
+        if success:
+            activity_id = activity_response.get('id')
+            activity_number = activity_response.get('activity_number')
+            self.log_result("Create CRM Activity", True, f"Activity {activity_number} created successfully")
+            
+            # Get activities
+            success, data = self.make_request('GET', 'crm/activities', token=token)
+            if success:
+                activities_count = len(data)
+                self.log_result("Get CRM Activities", True, f"Retrieved {activities_count} activities")
+            else:
+                self.log_result("Get CRM Activities", False, data.get('error', ''))
+            
+            # Test filtering by activity type
+            success, filtered_data = self.make_request('GET', 'crm/activities?activity_type=call', token=token)
+            if success:
+                filtered_count = len(filtered_data)
+                self.log_result("Filter CRM Activities by Type", True, f"Retrieved {filtered_count} call activities")
+            else:
+                self.log_result("Filter CRM Activities by Type", False, filtered_data.get('error', ''))
+            
+            return activity_id
+        else:
+            self.log_result("Create CRM Activity", False, activity_response.get('error', ''))
+            return None
+
+    def test_crm_products(self):
+        """Test CRM Products functionality"""
+        print("\n🛍️ Testing CRM Products...")
+        
+        if "owner_ali" not in self.user_tokens:
+            self.log_result("CRM Products - No Token", False, "owner_ali not authenticated")
+            return None
+        
+        token = self.user_tokens["owner_ali"]
+        
+        # Create product
+        product_data = {
+            "product_code": "PROD-001",
+            "product_name": "Enterprise License",
+            "product_name_ar": "رخصة مؤسسية",
+            "product_family": "Software",
+            "description": "Annual enterprise software license",
+            "list_price": 10000.00,
+            "unit_of_measure": "license"
+        }
+        
+        success, product_response = self.make_request('POST', 'crm/products', product_data, token=token)
+        if success:
+            product_id = product_response.get('id')
+            product_code = product_response.get('product_code')
+            self.log_result("Create CRM Product", True, f"Product {product_code} created successfully")
+            
+            # Get products
+            success, data = self.make_request('GET', 'crm/products', token=token)
+            if success:
+                products_count = len(data)
+                self.log_result("Get CRM Products", True, f"Retrieved {products_count} products")
+            else:
+                self.log_result("Get CRM Products", False, data.get('error', ''))
+            
+            # Test duplicate validation - try creating same product code again
+            success, duplicate_response = self.make_request('POST', 'crm/products', product_data, expected_status=400, token=token)
+            if success:  # success means we got expected 400
+                self.log_result("CRM Product Duplicate Validation", True, "Duplicate product code correctly rejected")
+            else:
+                self.log_result("CRM Product Duplicate Validation", False, "Should reject duplicate product code")
+            
+            return product_id
+        else:
+            self.log_result("Create CRM Product", False, product_response.get('error', ''))
+            return None
+
+    def test_crm_contracts(self):
+        """Test CRM Contracts functionality"""
+        print("\n📄 Testing CRM Contracts...")
+        
+        if "owner_ali" not in self.user_tokens:
+            self.log_result("CRM Contracts - No Token", False, "owner_ali not authenticated")
+            return None
+        
+        token = self.user_tokens["owner_ali"]
+        
+        # Create contract
+        contract_data = {
+            "contract_name": "Software License Agreement 2025",
+            "contract_name_ar": "اتفاقية ترخيص البرمجيات 2025",
+            "contract_type": "subscription",
+            "account_id": "test-account-001",
+            "start_date": "2025-01-01T00:00:00Z",
+            "end_date": "2025-12-31T23:59:59Z",
+            "contract_value": 120000.00,
+            "billing_frequency": "monthly",
+            "owner_id": "owner_ali"
+        }
+        
+        success, contract_response = self.make_request('POST', 'crm/contracts', contract_data, token=token)
+        if success:
+            contract_id = contract_response.get('id')
+            contract_number = contract_response.get('contract_number')
+            self.log_result("Create CRM Contract", True, f"Contract {contract_number} created successfully")
+            
+            # Get contracts
+            success, data = self.make_request('GET', 'crm/contracts', token=token)
+            if success:
+                contracts_count = len(data)
+                self.log_result("Get CRM Contracts", True, f"Retrieved {contracts_count} contracts")
+            else:
+                self.log_result("Get CRM Contracts", False, data.get('error', ''))
+            
+            # Activate contract
+            if contract_id:
+                success, activate_data = self.make_request('POST', f'crm/contracts/{contract_id}/activate', token=token)
+                if success:
+                    self.log_result("Activate CRM Contract", True, "Contract activated successfully")
+                else:
+                    self.log_result("Activate CRM Contract", False, activate_data.get('error', ''))
+            
+            return contract_id
+        else:
+            self.log_result("Create CRM Contract", False, contract_response.get('error', ''))
+            return None
+
+    def test_crm_email_templates(self):
+        """Test CRM Email Templates functionality"""
+        print("\n📧 Testing CRM Email Templates...")
+        
+        if "owner_ali" not in self.user_tokens:
+            self.log_result("CRM Email Templates - No Token", False, "owner_ali not authenticated")
+            return None
+        
+        token = self.user_tokens["owner_ali"]
+        
+        # Create email template
+        template_data = {
+            "template_code": "welcome_email",
+            "template_name": "Welcome Email Template",
+            "subject": "Welcome to our platform!",
+            "body_html": "<html><body><h1>Welcome {{customer_name}}!</h1></body></html>",
+            "available_merge_fields": ["customer_name", "company_name"]
+        }
+        
+        success, template_response = self.make_request('POST', 'crm/email-templates', template_data, token=token)
+        if success:
+            template_id = template_response.get('id')
+            template_code = template_response.get('template_code')
+            self.log_result("Create Email Template", True, f"Template {template_code} created successfully")
+            
+            # Get email templates
+            success, data = self.make_request('GET', 'crm/email-templates', token=token)
+            if success:
+                templates_count = len(data)
+                self.log_result("Get Email Templates", True, f"Retrieved {templates_count} templates")
+            else:
+                self.log_result("Get Email Templates", False, data.get('error', ''))
+            
+            return template_id
+        else:
+            self.log_result("Create Email Template", False, template_response.get('error', ''))
+            return None
+
+    def test_crm_emails(self):
+        """Test CRM Email Logging functionality"""
+        print("\n📨 Testing CRM Email Logging...")
+        
+        if "owner_ali" not in self.user_tokens:
+            self.log_result("CRM Emails - No Token", False, "owner_ali not authenticated")
+            return None
+        
+        token = self.user_tokens["owner_ali"]
+        
+        # Create/log email
+        email_data = {
+            "to_email": "customer@example.com",
+            "to_name": "Test Customer",
+            "subject": "Welcome to our platform",
+            "body_html": "<html><body>Welcome!</body></html>",
+            "related_to_type": "lead",
+            "related_to_id": "test-lead-001"
+        }
+        
+        success, email_response = self.make_request('POST', 'crm/emails', email_data, token=token)
+        if success:
+            email_id = email_response.get('id')
+            email_number = email_response.get('email_number')
+            self.log_result("Create CRM Email Log", True, f"Email {email_number} logged successfully")
+            
+            # Get emails
+            success, data = self.make_request('GET', 'crm/emails', token=token)
+            if success:
+                emails_count = len(data)
+                self.log_result("Get CRM Emails", True, f"Retrieved {emails_count} email logs")
+            else:
+                self.log_result("Get CRM Emails", False, data.get('error', ''))
+            
+            return email_id
+        else:
+            self.log_result("Create CRM Email Log", False, email_response.get('error', ''))
+            return None
+
+    def test_crm_forecasts(self):
+        """Test CRM Sales Forecasting functionality"""
+        print("\n📈 Testing CRM Sales Forecasting...")
+        
+        if "owner_ali" not in self.user_tokens:
+            self.log_result("CRM Forecasts - No Token", False, "owner_ali not authenticated")
+            return None
+        
+        token = self.user_tokens["owner_ali"]
+        
+        # Create forecast
+        forecast_data = {
+            "forecast_name": "Q1 2025 Sales Forecast",
+            "fiscal_year": 2025,
+            "period": "quarterly",
+            "period_name": "Q1 2025",
+            "start_date": "2025-01-01T00:00:00Z",
+            "end_date": "2025-03-31T23:59:59Z",
+            "owner_id": "owner_ali",
+            "territory": "KSA",
+            "pipeline_amount": 500000.00,
+            "best_case": 400000.00,
+            "commit": 300000.00,
+            "most_likely": 350000.00,
+            "opportunities": []
+        }
+        
+        success, forecast_response = self.make_request('POST', 'crm/forecasts', forecast_data, token=token)
+        if success:
+            forecast_id = forecast_response.get('id')
+            forecast_number = forecast_response.get('forecast_number')
+            self.log_result("Create CRM Forecast", True, f"Forecast {forecast_number} created successfully")
+            
+            # Get forecasts
+            success, data = self.make_request('GET', 'crm/forecasts', token=token)
+            if success:
+                forecasts_count = len(data)
+                self.log_result("Get CRM Forecasts", True, f"Retrieved {forecasts_count} forecasts")
+            else:
+                self.log_result("Get CRM Forecasts", False, data.get('error', ''))
+            
+            # Get specific forecast
+            if forecast_id:
+                success, forecast_detail = self.make_request('GET', f'crm/forecasts/{forecast_id}', token=token)
+                if success:
+                    forecast_name = forecast_detail.get('forecast_name')
+                    self.log_result("Get CRM Forecast Detail", True, f"Retrieved forecast: {forecast_name}")
+                else:
+                    self.log_result("Get CRM Forecast Detail", False, forecast_detail.get('error', ''))
+            
+            # Test filtering by fiscal year
+            success, filtered_data = self.make_request('GET', 'crm/forecasts?fiscal_year=2025', token=token)
+            if success:
+                filtered_count = len(filtered_data)
+                self.log_result("Filter CRM Forecasts by Year", True, f"Retrieved {filtered_count} forecasts for 2025")
+            else:
+                self.log_result("Filter CRM Forecasts by Year", False, filtered_data.get('error', ''))
+            
+            return forecast_id
+        else:
+            self.log_result("Create CRM Forecast", False, forecast_response.get('error', ''))
+            return None
+
+    def test_crm_rbac_permissions(self):
+        """Test RBAC permissions for CRM enhanced endpoints"""
+        print("\n🔐 Testing CRM Enhanced RBAC Permissions...")
+        
+        # Test Owner access (should have full access)
+        if "owner_ali" in self.user_tokens:
+            token = self.user_tokens["owner_ali"]
+            
+            success, data = self.make_request('GET', 'crm/tasks', token=token)
+            if success:
+                self.log_result("Owner Access CRM Tasks", True, "Owner has full access")
+            else:
+                self.log_result("Owner Access CRM Tasks", False, data.get('error', ''))
+        
+        # Test Manager access (should have full access)
+        if "manager_mohammad" in self.user_tokens:
+            token = self.user_tokens["manager_mohammad"]
+            
+            success, data = self.make_request('GET', 'crm/activities', token=token)
+            if success:
+                self.log_result("Manager Access CRM Activities", True, "Manager has full access")
+            else:
+                self.log_result("Manager Access CRM Activities", False, data.get('error', ''))
+        
+        # Test Accountant access (should have read-only access)
+        if "accountant_fatima" in self.user_tokens:
+            token = self.user_tokens["accountant_fatima"]
+            
+            success, data = self.make_request('GET', 'crm/products', token=token)
+            if success:
+                self.log_result("Accountant Read CRM Products", True, "Accountant has read access")
+            else:
+                self.log_result("Accountant Read CRM Products", False, data.get('error', ''))
+            
+            # Accountant should not be able to create
+            test_task = {
+                "subject": "Test task",
+                "description": "Test description",
+                "assigned_to": "accountant_fatima",
+                "priority": "normal"
+            }
+            success, data = self.make_request('POST', 'crm/tasks', test_task, expected_status=403, token=token)
+            if success:  # success means we got expected 403
+                self.log_result("Accountant Denied CRM Task Creation", True, "Accountant correctly denied write access")
+            else:
+                self.log_result("Accountant Denied CRM Task Creation", False, "Accountant should be denied write access")
+
     def run_all_tests(self):
         """Run comprehensive test suite including RBAC and Accounting"""
         print("🚀 Starting Comprehensive Backend API Testing for Khairat Al Ardh Operations Management System")
