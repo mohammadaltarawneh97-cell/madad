@@ -442,19 +442,551 @@ class ComprehensiveAPITester:
                 else:
                     self.log_result(f"Dashboard Data Structure - {username}", False, f"Missing keys: {missing_keys}")
     
+    def test_accounting_chart_of_accounts(self):
+        """Test Chart of Accounts functionality"""
+        print("\n📊 Testing Chart of Accounts...")
+        
+        if "accountant_fatima" not in self.user_tokens:
+            self.log_result("Chart of Accounts - No Token", False, "accountant_fatima not authenticated")
+            return
+        
+        token = self.user_tokens["accountant_fatima"]
+        
+        # Test accounts to create
+        test_accounts = [
+            {
+                "account_code": "1000",
+                "account_name": "Cash",
+                "account_name_ar": "النقد",
+                "account_type": "asset",
+                "account_subtype": "current_asset",
+                "opening_balance": 10000
+            },
+            {
+                "account_code": "2000",
+                "account_name": "Accounts Payable",
+                "account_name_ar": "حسابات الدفع",
+                "account_type": "liability",
+                "account_subtype": "current_liability",
+                "opening_balance": 0
+            },
+            {
+                "account_code": "3000",
+                "account_name": "Capital",
+                "account_name_ar": "رأس المال",
+                "account_type": "equity",
+                "account_subtype": "owner_equity",
+                "opening_balance": 10000
+            },
+            {
+                "account_code": "4000",
+                "account_name": "Sales Revenue",
+                "account_name_ar": "إيرادات المبيعات",
+                "account_type": "revenue",
+                "account_subtype": "operating_revenue",
+                "opening_balance": 0
+            },
+            {
+                "account_code": "5000",
+                "account_name": "Office Expenses",
+                "account_name_ar": "مصاريف المكتب",
+                "account_type": "expense",
+                "account_subtype": "operating_expense",
+                "opening_balance": 0
+            }
+        ]
+        
+        created_accounts = []
+        
+        # Create accounts
+        for account_data in test_accounts:
+            success, data = self.make_request('POST', 'accounting/chart-of-accounts', account_data, token=token)
+            if success:
+                created_accounts.append(data)
+                self.log_result(f"Create Account {account_data['account_code']}", True, 
+                               f"Account '{account_data['account_name']}' created successfully")
+            else:
+                self.log_result(f"Create Account {account_data['account_code']}", False, data.get('error', ''))
+        
+        # Get all accounts
+        success, data = self.make_request('GET', 'accounting/chart-of-accounts', token=token)
+        if success:
+            accounts_count = len(data)
+            self.log_result("Get Chart of Accounts", True, f"Retrieved {accounts_count} accounts")
+            
+            # Verify created accounts exist
+            account_codes = [acc.get('account_code') for acc in data]
+            for test_acc in test_accounts:
+                if test_acc['account_code'] in account_codes:
+                    self.log_result(f"Verify Account {test_acc['account_code']}", True, "Account found in chart")
+                else:
+                    self.log_result(f"Verify Account {test_acc['account_code']}", False, "Account not found")
+        else:
+            self.log_result("Get Chart of Accounts", False, data.get('error', ''))
+        
+        return created_accounts
+
+    def test_accounting_journal_entries(self, created_accounts):
+        """Test Journal Entries functionality"""
+        print("\n📝 Testing Journal Entries...")
+        
+        if "accountant_fatima" not in self.user_tokens:
+            self.log_result("Journal Entries - No Token", False, "accountant_fatima not authenticated")
+            return
+        
+        token = self.user_tokens["accountant_fatima"]
+        
+        if not created_accounts or len(created_accounts) < 2:
+            self.log_result("Journal Entries - No Accounts", False, "Need created accounts for testing")
+            return
+        
+        # Find cash and revenue accounts
+        cash_account = next((acc for acc in created_accounts if acc.get('account_code') == '1000'), None)
+        revenue_account = next((acc for acc in created_accounts if acc.get('account_code') == '4000'), None)
+        
+        if not cash_account or not revenue_account:
+            self.log_result("Journal Entries - Missing Accounts", False, "Cash or Revenue account not found")
+            return
+        
+        # Create journal entry
+        journal_entry_data = {
+            "entry_date": datetime.now(timezone.utc).isoformat(),
+            "description": "Test sales transaction",
+            "lines": [
+                {
+                    "account_id": cash_account['id'],
+                    "account_code": cash_account['account_code'],
+                    "account_name": cash_account['account_name'],
+                    "entry_type": "debit",
+                    "amount": 5000,
+                    "amount_base_currency": 5000,
+                    "currency": "SAR",
+                    "exchange_rate": 1.0
+                },
+                {
+                    "account_id": revenue_account['id'],
+                    "account_code": revenue_account['account_code'],
+                    "account_name": revenue_account['account_name'],
+                    "entry_type": "credit",
+                    "amount": 5000,
+                    "amount_base_currency": 5000,
+                    "currency": "SAR",
+                    "exchange_rate": 1.0
+                }
+            ]
+        }
+        
+        # Create journal entry
+        success, data = self.make_request('POST', 'accounting/journal-entries', journal_entry_data, token=token)
+        if success:
+            entry_id = data.get('id')
+            entry_number = data.get('entry_number')
+            self.log_result("Create Journal Entry", True, f"Entry {entry_number} created in DRAFT status")
+            
+            # Post the journal entry
+            if entry_id:
+                success, post_data = self.make_request('POST', f'accounting/journal-entries/{entry_id}/post', token=token)
+                if success:
+                    self.log_result("Post Journal Entry", True, "Entry posted successfully, balances updated")
+                else:
+                    self.log_result("Post Journal Entry", False, post_data.get('error', ''))
+        else:
+            self.log_result("Create Journal Entry", False, data.get('error', ''))
+        
+        # Get journal entries
+        success, data = self.make_request('GET', 'accounting/journal-entries', token=token)
+        if success:
+            entries_count = len(data)
+            self.log_result("Get Journal Entries", True, f"Retrieved {entries_count} journal entries")
+        else:
+            self.log_result("Get Journal Entries", False, data.get('error', ''))
+
+    def test_accounting_vendors_and_bills(self):
+        """Test Vendors and Vendor Bills functionality"""
+        print("\n🏪 Testing Vendors & AP Bills...")
+        
+        if "accountant_fatima" not in self.user_tokens:
+            self.log_result("Vendors - No Token", False, "accountant_fatima not authenticated")
+            return
+        
+        token = self.user_tokens["accountant_fatima"]
+        
+        # Create vendor
+        vendor_data = {
+            "vendor_code": "V001",
+            "vendor_name": "Test Supplier",
+            "vendor_type": "supplier",
+            "payment_terms_days": 30
+        }
+        
+        success, vendor_response = self.make_request('POST', 'accounting/vendors', vendor_data, token=token)
+        if success:
+            vendor_id = vendor_response.get('id')
+            self.log_result("Create Vendor", True, f"Vendor {vendor_data['vendor_code']} created")
+            
+            # Get vendors
+            success, data = self.make_request('GET', 'accounting/vendors', token=token)
+            if success:
+                vendors_count = len(data)
+                self.log_result("Get Vendors", True, f"Retrieved {vendors_count} vendors")
+            else:
+                self.log_result("Get Vendors", False, data.get('error', ''))
+            
+            # Create vendor bill if vendor created successfully
+            if vendor_id:
+                bill_data = {
+                    "vendor_id": vendor_id,
+                    "bill_date": datetime.now(timezone.utc).isoformat(),
+                    "lines": [
+                        {
+                            "line_number": 1,
+                            "description": "Office supplies",
+                            "account_id": "dummy_account_id",
+                            "account_code": "5000",
+                            "quantity": 1.0,
+                            "unit_price": 1000.0,
+                            "amount": 1000.0,
+                            "tax_rate": 0.15,
+                            "tax_amount": 150.0,
+                            "total_amount": 1150.0
+                        }
+                    ]
+                }
+                
+                success, bill_response = self.make_request('POST', 'accounting/vendor-bills', bill_data, token=token)
+                if success:
+                    bill_number = bill_response.get('bill_number')
+                    total_amount = bill_response.get('total_amount')
+                    self.log_result("Create Vendor Bill", True, f"Bill {bill_number} created, Total: {total_amount}")
+                else:
+                    self.log_result("Create Vendor Bill", False, bill_response.get('error', ''))
+                
+                # Get vendor bills
+                success, data = self.make_request('GET', 'accounting/vendor-bills', token=token)
+                if success:
+                    bills_count = len(data)
+                    self.log_result("Get Vendor Bills", True, f"Retrieved {bills_count} vendor bills")
+                else:
+                    self.log_result("Get Vendor Bills", False, data.get('error', ''))
+        else:
+            self.log_result("Create Vendor", False, vendor_response.get('error', ''))
+
+    def test_accounting_customers_and_invoices(self):
+        """Test Customers and AR Invoices functionality"""
+        print("\n👥 Testing Customers & AR Invoices...")
+        
+        if "accountant_fatima" not in self.user_tokens:
+            self.log_result("Customers - No Token", False, "accountant_fatima not authenticated")
+            return
+        
+        token = self.user_tokens["accountant_fatima"]
+        
+        # Create customer
+        customer_data = {
+            "customer_code": "C001",
+            "customer_name": "Test Customer",
+            "customer_type": "company",
+            "payment_terms_days": 30
+        }
+        
+        success, customer_response = self.make_request('POST', 'accounting/customers', customer_data, token=token)
+        if success:
+            customer_id = customer_response.get('id')
+            self.log_result("Create Customer", True, f"Customer {customer_data['customer_code']} created")
+            
+            # Get customers
+            success, data = self.make_request('GET', 'accounting/customers', token=token)
+            if success:
+                customers_count = len(data)
+                self.log_result("Get Customers", True, f"Retrieved {customers_count} customers")
+            else:
+                self.log_result("Get Customers", False, data.get('error', ''))
+            
+            # Create AR invoice if customer created successfully
+            if customer_id:
+                invoice_data = {
+                    "customer_id": customer_id,
+                    "invoice_date": datetime.now(timezone.utc).isoformat(),
+                    "lines": [
+                        {
+                            "line_number": 1,
+                            "description": "Consulting services",
+                            "account_id": "dummy_account_id",
+                            "account_code": "4000",
+                            "quantity": 1.0,
+                            "unit_price": 5000.0,
+                            "amount": 5000.0,
+                            "tax_rate": 0.15,
+                            "tax_amount": 750.0,
+                            "total_amount": 5750.0
+                        }
+                    ]
+                }
+                
+                success, invoice_response = self.make_request('POST', 'accounting/ar-invoices', invoice_data, token=token)
+                if success:
+                    invoice_number = invoice_response.get('invoice_number')
+                    total_amount = invoice_response.get('total_amount')
+                    self.log_result("Create AR Invoice", True, f"Invoice {invoice_number} created, Total: {total_amount}")
+                else:
+                    self.log_result("Create AR Invoice", False, invoice_response.get('error', ''))
+                
+                # Get AR invoices
+                success, data = self.make_request('GET', 'accounting/ar-invoices', token=token)
+                if success:
+                    invoices_count = len(data)
+                    self.log_result("Get AR Invoices", True, f"Retrieved {invoices_count} AR invoices")
+                else:
+                    self.log_result("Get AR Invoices", False, data.get('error', ''))
+        else:
+            self.log_result("Create Customer", False, customer_response.get('error', ''))
+
+    def test_accounting_fixed_assets(self, created_accounts):
+        """Test Fixed Assets functionality"""
+        print("\n🏗️ Testing Fixed Assets...")
+        
+        if "accountant_fatima" not in self.user_tokens:
+            self.log_result("Fixed Assets - No Token", False, "accountant_fatima not authenticated")
+            return
+        
+        token = self.user_tokens["accountant_fatima"]
+        
+        if not created_accounts or len(created_accounts) < 3:
+            self.log_result("Fixed Assets - No Accounts", False, "Need created accounts for testing")
+            return
+        
+        # Find required accounts
+        asset_account = next((acc for acc in created_accounts if acc.get('account_type') == 'asset'), None)
+        liability_account = next((acc for acc in created_accounts if acc.get('account_type') == 'liability'), None)
+        expense_account = next((acc for acc in created_accounts if acc.get('account_type') == 'expense'), None)
+        
+        if not all([asset_account, liability_account, expense_account]):
+            self.log_result("Fixed Assets - Missing Account Types", False, "Need asset, liability, and expense accounts")
+            return
+        
+        # Create fixed asset
+        asset_data = {
+            "asset_code": "FA001",
+            "asset_name": "Office Equipment",
+            "asset_category": "furniture",
+            "purchase_price": 50000,
+            "useful_life_years": 5,
+            "salvage_value": 5000,
+            "depreciation_method": "straight_line",
+            "purchase_date": "2025-01-01T00:00:00Z",
+            "asset_account_id": asset_account['id'],
+            "depreciation_account_id": liability_account['id'],
+            "expense_account_id": expense_account['id']
+        }
+        
+        success, asset_response = self.make_request('POST', 'accounting/fixed-assets', asset_data, token=token)
+        if success:
+            asset_code = asset_response.get('asset_code')
+            net_book_value = asset_response.get('net_book_value')
+            self.log_result("Create Fixed Asset", True, f"Asset {asset_code} created, NBV: {net_book_value}")
+        else:
+            self.log_result("Create Fixed Asset", False, asset_response.get('error', ''))
+        
+        # Get fixed assets
+        success, data = self.make_request('GET', 'accounting/fixed-assets', token=token)
+        if success:
+            assets_count = len(data)
+            self.log_result("Get Fixed Assets", True, f"Retrieved {assets_count} fixed assets")
+        else:
+            self.log_result("Get Fixed Assets", False, data.get('error', ''))
+
+    def test_accounting_tax_configuration(self, created_accounts):
+        """Test Tax Configuration functionality"""
+        print("\n💰 Testing Tax Configuration...")
+        
+        if "accountant_fatima" not in self.user_tokens:
+            self.log_result("Tax Config - No Token", False, "accountant_fatima not authenticated")
+            return
+        
+        token = self.user_tokens["accountant_fatima"]
+        
+        if not created_accounts:
+            self.log_result("Tax Config - No Accounts", False, "Need created accounts for testing")
+            return
+        
+        # Find liability account for tax payable
+        liability_account = next((acc for acc in created_accounts if acc.get('account_type') == 'liability'), None)
+        
+        if not liability_account:
+            self.log_result("Tax Config - No Liability Account", False, "Need liability account for tax payable")
+            return
+        
+        # Create VAT configuration
+        tax_data = {
+            "tax_code": "VAT15",
+            "tax_name": "VAT 15%",
+            "tax_name_ar": "ضريبة القيمة المضافة",
+            "tax_type": "vat",
+            "tax_rate": 15,
+            "effective_from": "2025-01-01T00:00:00Z",
+            "tax_payable_account_id": liability_account['id']
+        }
+        
+        success, tax_response = self.make_request('POST', 'accounting/tax-configuration', tax_data, token=token)
+        if success:
+            tax_code = tax_response.get('tax_code')
+            tax_rate = tax_response.get('tax_rate')
+            self.log_result("Create Tax Config", True, f"Tax {tax_code} created, Rate: {tax_rate}%")
+        else:
+            self.log_result("Create Tax Config", False, tax_response.get('error', ''))
+        
+        # Get tax configurations
+        success, data = self.make_request('GET', 'accounting/tax-configuration', token=token)
+        if success:
+            tax_count = len(data)
+            self.log_result("Get Tax Configurations", True, f"Retrieved {tax_count} tax configurations")
+        else:
+            self.log_result("Get Tax Configurations", False, data.get('error', ''))
+
+    def test_accounting_exchange_rates(self):
+        """Test Exchange Rates functionality"""
+        print("\n💱 Testing Exchange Rates...")
+        
+        if "accountant_fatima" not in self.user_tokens:
+            self.log_result("Exchange Rates - No Token", False, "accountant_fatima not authenticated")
+            return
+        
+        token = self.user_tokens["accountant_fatima"]
+        
+        # Create USD to SAR exchange rate
+        rate_data = {
+            "from_currency": "USD",
+            "to_currency": "SAR",
+            "rate": 3.75,
+            "effective_date": "2025-01-01T00:00:00Z"
+        }
+        
+        success, rate_response = self.make_request('POST', 'accounting/exchange-rates', rate_data, token=token)
+        if success:
+            from_currency = rate_response.get('from_currency')
+            to_currency = rate_response.get('to_currency')
+            rate = rate_response.get('rate')
+            self.log_result("Create Exchange Rate", True, f"Rate {from_currency}/{to_currency}: {rate}")
+        else:
+            self.log_result("Create Exchange Rate", False, rate_response.get('error', ''))
+        
+        # Get exchange rates
+        success, data = self.make_request('GET', 'accounting/exchange-rates', token=token)
+        if success:
+            rates_count = len(data)
+            self.log_result("Get Exchange Rates", True, f"Retrieved {rates_count} exchange rates")
+        else:
+            self.log_result("Get Exchange Rates", False, data.get('error', ''))
+
+    def test_accounting_financial_reports(self):
+        """Test Financial Reports functionality"""
+        print("\n📈 Testing Financial Reports...")
+        
+        if "accountant_fatima" not in self.user_tokens:
+            self.log_result("Financial Reports - No Token", False, "accountant_fatima not authenticated")
+            return
+        
+        token = self.user_tokens["accountant_fatima"]
+        
+        # Test Trial Balance
+        success, trial_balance = self.make_request('GET', 'accounting/reports/trial-balance', token=token)
+        if success:
+            total_debit = trial_balance.get('total_debit', 0)
+            total_credit = trial_balance.get('total_credit', 0)
+            balanced = trial_balance.get('balanced', False)
+            accounts_count = len(trial_balance.get('accounts', []))
+            self.log_result("Trial Balance Report", True, 
+                           f"Accounts: {accounts_count}, Debits: {total_debit}, Credits: {total_credit}, Balanced: {balanced}")
+        else:
+            self.log_result("Trial Balance Report", False, trial_balance.get('error', ''))
+        
+        # Test Balance Sheet
+        success, balance_sheet = self.make_request('GET', 'accounting/reports/balance-sheet', token=token)
+        if success:
+            total_assets = balance_sheet.get('total_assets', 0)
+            total_liabilities = balance_sheet.get('total_liabilities', 0)
+            total_equity = balance_sheet.get('total_equity', 0)
+            balanced = balance_sheet.get('balanced', False)
+            self.log_result("Balance Sheet Report", True, 
+                           f"Assets: {total_assets}, Liabilities: {total_liabilities}, Equity: {total_equity}, Balanced: {balanced}")
+        else:
+            self.log_result("Balance Sheet Report", False, balance_sheet.get('error', ''))
+        
+        # Test Income Statement
+        from_date = "2025-01-01T00:00:00Z"
+        to_date = "2025-12-31T23:59:59Z"
+        success, income_statement = self.make_request('GET', f'accounting/reports/income-statement?from_date={from_date}&to_date={to_date}', token=token)
+        if success:
+            total_revenue = income_statement.get('total_revenue', 0)
+            total_expenses = income_statement.get('total_expenses', 0)
+            net_income = income_statement.get('net_income', 0)
+            self.log_result("Income Statement Report", True, 
+                           f"Revenue: {total_revenue}, Expenses: {total_expenses}, Net Income: {net_income}")
+        else:
+            self.log_result("Income Statement Report", False, income_statement.get('error', ''))
+
+    def test_accounting_rbac_permissions(self):
+        """Test RBAC permissions for accounting endpoints"""
+        print("\n🔐 Testing Accounting RBAC Permissions...")
+        
+        # Test with manager (should have read access only)
+        if "manager_mohammad" in self.user_tokens:
+            token = self.user_tokens["manager_mohammad"]
+            
+            # Manager should be able to read chart of accounts
+            success, data = self.make_request('GET', 'accounting/chart-of-accounts', token=token)
+            if success:
+                self.log_result("Manager Read Chart of Accounts", True, "Manager has read access")
+            else:
+                self.log_result("Manager Read Chart of Accounts", False, data.get('error', ''))
+        
+        # Test with driver (should get 403 Forbidden)
+        if "driver_khalid" in self.user_tokens:
+            token = self.user_tokens["driver_khalid"]
+            
+            # Driver should be denied access to accounting
+            success, data = self.make_request('GET', 'accounting/chart-of-accounts', expected_status=403, token=token)
+            if success:  # success means we got expected 403
+                self.log_result("Driver Denied Accounting Access", True, "Driver correctly denied access")
+            else:
+                self.log_result("Driver Denied Accounting Access", False, "Driver should be denied access")
+
     def run_all_tests(self):
-        """Run comprehensive RBAC test suite"""
-        print("🚀 Starting RBAC Backend API Testing for Khairat Al Ardh Operations Management System")
-        print("=" * 90)
+        """Run comprehensive test suite including RBAC and Accounting"""
+        print("🚀 Starting Comprehensive Backend API Testing for Khairat Al Ardh Operations Management System")
+        print("=" * 100)
+        print("Testing RBAC System + Oracle-like Accounting System")
+        print("=" * 100)
         print("Testing 7 different roles with specific permissions:")
         for username, user_info in self.test_users.items():
             print(f"  👤 {user_info['role'].upper():12} | {username:20} | {user_info['full_name']}")
-        print("=" * 90)
+        print("=" * 100)
         
-        # Run all test categories
+        # Run RBAC tests first
         self.test_health_check()
         self.test_user_authentication()
         self.test_user_permissions_context()
+        
+        # Run comprehensive accounting system tests
+        print("\n" + "🏦" * 50)
+        print("ORACLE-LIKE ACCOUNTING SYSTEM TESTING")
+        print("🏦" * 50)
+        
+        created_accounts = self.test_accounting_chart_of_accounts()
+        self.test_accounting_journal_entries(created_accounts)
+        self.test_accounting_vendors_and_bills()
+        self.test_accounting_customers_and_invoices()
+        self.test_accounting_fixed_assets(created_accounts)
+        self.test_accounting_tax_configuration(created_accounts)
+        self.test_accounting_exchange_rates()
+        self.test_accounting_financial_reports()
+        self.test_accounting_rbac_permissions()
+        
+        # Run remaining RBAC tests
+        print("\n" + "🔐" * 50)
+        print("RBAC SYSTEM TESTING")
+        print("🔐" * 50)
+        
         self.test_equipment_permissions()
         self.test_production_permissions()
         self.test_expenses_permissions()
@@ -463,9 +995,9 @@ class ComprehensiveAPITester:
         self.test_dashboard_permissions()
         
         # Print final results
-        print("\n" + "=" * 90)
-        print("📋 RBAC TESTING FINAL RESULTS")
-        print("=" * 90)
+        print("\n" + "=" * 100)
+        print("📋 COMPREHENSIVE TESTING FINAL RESULTS")
+        print("=" * 100)
         print(f"✅ Tests Passed: {self.tests_passed}/{self.tests_run}")
         print(f"❌ Tests Failed: {len(self.failed_tests)}/{self.tests_run}")
         print(f"📊 Success Rate: {(self.tests_passed/self.tests_run)*100:.1f}%")
