@@ -98,7 +98,7 @@ async def create_task(
     
     task_data = Task(
         id=str(uuid.uuid4()),
-        company_id=current_user.company_id,
+        company_id=current_user.current_company_id,
         task_number=task_number,
         assigned_to_name=assigned_to_name,
         assigned_by=current_user.id,
@@ -223,7 +223,7 @@ async def create_activity(
     
     activity_data = Activity(
         id=str(uuid.uuid4()),
-        company_id=current_user.company_id,
+        company_id=current_user.current_company_id,
         activity_number=activity_number,
         related_to_name=related_to_name,
         owner_id=current_user.id,
@@ -286,7 +286,7 @@ async def create_product(
     
     product_data = CRMProduct(
         id=str(uuid.uuid4()),
-        company_id=current_user.company_id,
+        company_id=current_user.current_company_id,
         **product.dict(),
         created_by=current_user.id,
         created_at=datetime.now(timezone.utc)
@@ -352,7 +352,7 @@ async def create_contract(
     
     contract_data = Contract(
         id=str(uuid.uuid4()),
-        company_id=current_user.company_id,
+        company_id=current_user.current_company_id,
         contract_number=contract_number,
         account_name=account_name,
         contact_name=contact_name,
@@ -438,7 +438,7 @@ async def create_email_template(
     
     template_data = EmailTemplate(
         id=str(uuid.uuid4()),
-        company_id=current_user.company_id,
+        company_id=current_user.current_company_id,
         **template.dict(),
         created_by=current_user.id,
         created_at=datetime.now(timezone.utc)
@@ -498,7 +498,7 @@ async def create_email(
     
     email_data = Email(
         id=str(uuid.uuid4()),
-        company_id=current_user.company_id,
+        company_id=current_user.current_company_id,
         email_number=email_number,
         related_to_name=related_to_name,
         sent_by=current_user.id,
@@ -559,7 +559,7 @@ async def create_forecast(
     
     forecast_data = SalesForecast(
         id=str(uuid.uuid4()),
-        company_id=current_user.company_id,
+        company_id=current_user.current_company_id,
         forecast_number=forecast_number,
         owner_name=owner_name,
         **forecast.dict(),
