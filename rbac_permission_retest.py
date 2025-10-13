@@ -11,7 +11,7 @@ from datetime import datetime, timezone
 from typing import Dict, Any, Optional
 
 class RBACPermissionRetest:
-    def __init__(self, base_url: str = "https://operationshub.preview.emergentagent.com"):
+    def __init__(self, base_url: str = "https://company-dashboard-5.preview.emergentagent.com"):
         self.base_url = base_url
         self.api_url = f"{base_url}/api"
         self.tests_run = 0

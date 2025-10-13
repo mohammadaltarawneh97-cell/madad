@@ -1,7 +1,7 @@
 # 🔐 Complete Test Accounts - Khairit Operations Hub
 
 ## 📱 Application Access
-- **URL:** https://operationshub.preview.emergentagent.com
+- **URL:** https://company-dashboard-5.preview.emergentagent.com
 - **All Passwords:** `password123`
 - **Company:** شركة خيرات الأرض للمحاجر
 
@@ -164,7 +164,7 @@
 
 ### 1. Login Test
 ```
-1. Go to: https://operationshub.preview.emergentagent.com
+1. Go to: https://company-dashboard-5.preview.emergentagent.com
 2. Enter any username from the table above
 3. Password: password123
 4. Click "تسجيل الدخول" (Login)
