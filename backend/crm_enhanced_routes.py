@@ -548,7 +548,7 @@ async def create_forecast(
         raise HTTPException(status_code=403, detail="You don't have permission to create forecasts")
     
     # Generate forecast number
-    forecast_number = await get_next_number(current_user.company_id, "FCST", "forecasts")
+    forecast_number = await get_next_number(current_user.current_company_id, "FCST", "forecasts")
     
     # Get owner name if provided
     owner_name = None
