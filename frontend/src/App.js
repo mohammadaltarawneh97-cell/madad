@@ -430,6 +430,13 @@ function App() {
               </DashboardLayout>
             </ProtectedRoute>
           } />
+          <Route path="/warehouse/inventory-transfers" element={
+            <ProtectedRoute>
+              <DashboardLayout>
+                <InventoryTransfers />
+              </DashboardLayout>
+            </ProtectedRoute>
+          } />
         </Routes>
       </BrowserRouter>
     </AppProvider>
