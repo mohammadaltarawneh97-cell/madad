@@ -55,6 +55,13 @@ ROLE_PERMISSIONS = {
         "opportunities": ["create", "read", "update", "delete"],
         "cases": ["create", "read", "update", "delete"],
         "campaigns": ["create", "read", "update", "delete"],
+        # Enhanced CRM Modules
+        "tasks": ["create", "read", "update", "delete"],
+        "activities": ["create", "read", "update", "delete"],
+        "contracts": ["create", "read", "update", "delete"],
+        "email_templates": ["create", "read", "update", "delete"],
+        "emails": ["create", "read"],
+        "forecasts": ["create", "read", "update", "delete"],
         # Warehouse Modules
         "warehouses": ["create", "read", "update", "delete"],
         "products": ["create", "read", "update", "delete"],
