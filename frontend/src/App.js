@@ -6,11 +6,13 @@ import "./App.css";
 import { 
   AppProvider, 
   ProtectedRoute, 
-  DashboardLayout, 
   Login, 
   CompanyManagement,
   useApp 
 } from "./components/MultiCompanyApp";
+
+// Import New Shell Layout
+import NewShell from "./components/NewShell";
 
 // Import Advanced Dashboard
 import AdvancedDashboard from './components/AdvancedDashboard';
