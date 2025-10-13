@@ -460,18 +460,21 @@ async def create_ar_invoice(invoice_data: ARInvoiceCreate, user: User = Depends(
     # Calculate due date if not provided
     due_date = invoice_data.due_date or (invoice_data.invoice_date + timedelta(days=invoice_data.payment_terms_days or 30))
     
-    invoice_obj = ARInvoice(
-        **invoice_data.model_dump(),
-        company_id=user.current_company_id,
-        invoice_number=invoice_number,
-        customer_name=customer['customer_name'],
-        customer_code=customer['customer_code'],
-        due_date=due_date,
-        subtotal=subtotal,
-        tax_amount=tax_amount,
-        total_amount=total_amount,
-        amount_due=total_amount
-    )
+    # Create invoice data dict without due_date to avoid conflict
+    invoice_dict = invoice_data.model_dump()
+    invoice_dict.update({
+        'company_id': user.current_company_id,
+        'invoice_number': invoice_number,
+        'customer_name': customer['customer_name'],
+        'customer_code': customer['customer_code'],
+        'due_date': due_date,
+        'subtotal': subtotal,
+        'tax_amount': tax_amount,
+        'total_amount': total_amount,
+        'amount_due': total_amount
+    })
+    
+    invoice_obj = ARInvoice(**invoice_dict)
     
     doc = invoice_obj.model_dump()
     serialize_datetime(doc)
