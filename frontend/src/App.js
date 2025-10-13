@@ -72,6 +72,7 @@ import StockBalance from './components/warehouse/StockBalance';
 import Warehouses from './components/warehouse/Warehouses';
 import StockMovements from './components/warehouse/StockMovements';
 import PurchaseOrders from './components/warehouse/PurchaseOrders';
+import InventoryTransfers from './components/warehouse/InventoryTransfers';
 
 // Role-based Dashboard Component
 const RoleDashboard = () => {
