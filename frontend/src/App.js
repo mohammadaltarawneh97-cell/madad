@@ -48,6 +48,7 @@ import FinancialReports from './components/accounting/FinancialReports';
 import BankReconciliation from './components/accounting/BankReconciliation';
 import ExpenseClaims from './components/accounting/ExpenseClaims';
 import Budgets from './components/accounting/Budgets';
+import PaymentBatches from './components/accounting/PaymentBatches';
 
 // Import CRM components
 import CRMDashboard from './components/crm/CRMDashboard';
