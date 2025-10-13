@@ -127,7 +127,7 @@ async def get_tasks(
     if not current_user.has_permission("tasks", "read"):
         raise HTTPException(status_code=403, detail="You don't have permission to view tasks")
     
-    query = {"company_id": current_user.company_id}
+    query = {"company_id": current_user.current_company_id}
     if assigned_to:
         query["assigned_to"] = assigned_to
     if status:
@@ -250,7 +250,7 @@ async def get_activities(
     if not current_user.has_permission("activities", "read"):
         raise HTTPException(status_code=403, detail="You don't have permission to view activities")
     
-    query = {"company_id": current_user.company_id}
+    query = {"company_id": current_user.current_company_id}
     if related_to_type:
         query["related_to_type"] = related_to_type
     if related_to_id:
@@ -308,7 +308,7 @@ async def get_products(
     if not current_user.has_permission("products", "read"):
         raise HTTPException(status_code=403, detail="You don't have permission to view products")
     
-    query = {"company_id": current_user.company_id}
+    query = {"company_id": current_user.current_company_id}
     if product_family:
         query["product_family"] = product_family
     if is_active is not None:
@@ -378,7 +378,7 @@ async def get_contracts(
     if not current_user.has_permission("contracts", "read"):
         raise HTTPException(status_code=403, detail="You don't have permission to view contracts")
     
-    query = {"company_id": current_user.company_id}
+    query = {"company_id": current_user.current_company_id}
     if account_id:
         query["account_id"] = account_id
     if status:
@@ -459,7 +459,7 @@ async def get_email_templates(
     if not current_user.has_permission("email_templates", "read"):
         raise HTTPException(status_code=403, detail="You don't have permission to view email templates")
     
-    query = {"company_id": current_user.company_id}
+    query = {"company_id": current_user.current_company_id}
     if is_active is not None:
         query["is_active"] = is_active
     
@@ -523,7 +523,7 @@ async def get_emails(
     if not current_user.has_permission("emails", "read"):
         raise HTTPException(status_code=403, detail="You don't have permission to view emails")
     
-    query = {"company_id": current_user.company_id}
+    query = {"company_id": current_user.current_company_id}
     if related_to_type:
         query["related_to_type"] = related_to_type
     if related_to_id:
@@ -583,7 +583,7 @@ async def get_forecasts(
     if not current_user.has_permission("forecasts", "read"):
         raise HTTPException(status_code=403, detail="You don't have permission to view forecasts")
     
-    query = {"company_id": current_user.company_id}
+    query = {"company_id": current_user.current_company_id}
     if fiscal_year:
         query["fiscal_year"] = fiscal_year
     if period:
