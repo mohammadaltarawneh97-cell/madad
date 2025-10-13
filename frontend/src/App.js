@@ -55,6 +55,11 @@ import Opportunities from './components/crm/Opportunities';
 import Cases from './components/crm/Cases';
 import Campaigns from './components/crm/Campaigns';
 
+// Import Warehouse components
+import WarehouseDashboard from './components/warehouse/WarehouseDashboard';
+import Products from './components/warehouse/Products';
+import StockBalance from './components/warehouse/StockBalance';
+
 // Role-based Dashboard Component
 const RoleDashboard = () => {
   const { userRole } = useApp();
