@@ -404,7 +404,7 @@ async def activate_contract(
             "$set": {
                 "status": ContractStatus.ACTIVE.value,
                 "signed_date": datetime.now(timezone.utc).isoformat(),
-                "signed_by_company": current_user.name
+                "signed_by_company": current_user.full_name
             }
         }
     )
