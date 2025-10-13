@@ -154,7 +154,7 @@ class Vendor(CompanyBaseModel):
     vendor_code: str = Field(..., description="Unique vendor code")
     vendor_name: str
     vendor_name_ar: Optional[str] = None
-    vendor_type: Optional[VendorType] = VendorType.LOCAL  # Made optional with default
+    vendor_type: Optional[VendorType] = VendorType.SUPPLIER  # Made optional with default
     tax_id: Optional[str] = None
     commercial_register: Optional[str] = None
     contact_person: Optional[str] = None
