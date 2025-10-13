@@ -59,6 +59,9 @@ import Campaigns from './components/crm/Campaigns';
 import WarehouseDashboard from './components/warehouse/WarehouseDashboard';
 import Products from './components/warehouse/Products';
 import StockBalance from './components/warehouse/StockBalance';
+import Warehouses from './components/warehouse/Warehouses';
+import StockMovements from './components/warehouse/StockMovements';
+import PurchaseOrders from './components/warehouse/PurchaseOrders';
 
 // Role-based Dashboard Component
 const RoleDashboard = () => {
