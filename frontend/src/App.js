@@ -35,6 +35,17 @@ import AccountantDashboard from './components/AccountantDashboard';
 import ForemanDashboard from './components/ForemanDashboard';
 import ManagerDashboard from './components/ManagerDashboard';
 
+// Import accounting components
+import AccountingDashboard from './components/accounting/AccountingDashboard';
+import ChartOfAccounts from './components/accounting/ChartOfAccounts';
+import GeneralLedger from './components/accounting/GeneralLedger';
+import Vendors from './components/accounting/Vendors';
+import VendorBills from './components/accounting/VendorBills';
+import Customers from './components/accounting/Customers';
+import ARInvoices from './components/accounting/ARInvoices';
+import FixedAssets from './components/accounting/FixedAssets';
+import FinancialReports from './components/accounting/FinancialReports';
+
 // Role-based Dashboard Component
 const RoleDashboard = () => {
   const { userRole } = useApp();
