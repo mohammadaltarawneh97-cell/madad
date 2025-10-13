@@ -1,0 +1,2 @@
+This is a test file for upload functionality.
+Line 2 of test content.
