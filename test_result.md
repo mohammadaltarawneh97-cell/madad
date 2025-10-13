@@ -1596,9 +1596,9 @@ metadata:
 
 test_plan:
   current_focus:
-    - "File Upload/Download with MinIO integration"
-    - "CSV Import/Export for Accounting, CRM, Warehouse"
-    - "Backend API testing for file and CSV operations"
+    - "File Upload & CSV Import/Export Backend Testing Complete ✅"
+    - "Minor RBAC permission fix needed for Driver file access"
+    - "Frontend UI testing for file upload and CSV components"
   stuck_tasks: []
   test_all: false
   test_priority: "high_first"
