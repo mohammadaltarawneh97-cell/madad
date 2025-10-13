@@ -1014,7 +1014,7 @@ class ComprehensiveAPITester:
 
 def main():
     """Main test execution"""
-    tester = RBACAPITester()
+    tester = ComprehensiveAPITester()
     
     try:
         success = tester.run_all_tests()
