@@ -328,6 +328,27 @@ function App() {
               </DashboardLayout>
             </ProtectedRoute>
           } />
+          <Route path="/warehouse/warehouses" element={
+            <ProtectedRoute>
+              <DashboardLayout>
+                <Warehouses />
+              </DashboardLayout>
+            </ProtectedRoute>
+          } />
+          <Route path="/warehouse/stock-movements" element={
+            <ProtectedRoute>
+              <DashboardLayout>
+                <StockMovements />
+              </DashboardLayout>
+            </ProtectedRoute>
+          } />
+          <Route path="/warehouse/purchase-orders" element={
+            <ProtectedRoute>
+              <DashboardLayout>
+                <PurchaseOrders />
+              </DashboardLayout>
+            </ProtectedRoute>
+          } />
         </Routes>
       </BrowserRouter>
     </AppProvider>
