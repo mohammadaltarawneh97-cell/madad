@@ -140,6 +140,7 @@ ROLE_PERMISSIONS = {
         "positions": ["read"],
         "org_chart": ["read"],
         # Accounting Modules - Manager has read access + approve bills/payments
+        "accounting": ["read", "approve"],  # Generic accounting permission
         "chart_of_accounts": ["read"],
         "journal_entries": ["read"],
         "vendors": ["read"],
