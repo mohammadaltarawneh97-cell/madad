@@ -834,6 +834,10 @@ app.include_router(warehouse_router)
 from accounting_enhanced_routes import router as accounting_enhanced_router
 app.include_router(accounting_enhanced_router)
 
+# Import and include Enhanced CRM routes
+from crm_enhanced_routes import router as crm_enhanced_router
+app.include_router(crm_enhanced_router)
+
 # CORS middleware
 app.add_middleware(
     CORSMiddleware,
