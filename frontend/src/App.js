@@ -285,6 +285,13 @@ function App() {
               </DashboardLayout>
             </ProtectedRoute>
           } />
+          <Route path="/accounting/payment-batches" element={
+            <ProtectedRoute>
+              <DashboardLayout>
+                <PaymentBatches />
+              </DashboardLayout>
+            </ProtectedRoute>
+          } />
           
           {/* CRM Routes */}
           <Route path="/crm" element={
