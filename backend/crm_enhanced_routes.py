@@ -478,7 +478,7 @@ async def create_email(
         raise HTTPException(status_code=403, detail="You don't have permission to create emails")
     
     # Generate email number
-    email_number = await get_next_number(current_user.company_id, "EMAIL", "emails")
+    email_number = await get_next_number(current_user.current_company_id, "EMAIL", "emails")
     
     # Get related record name if provided
     related_to_name = None
