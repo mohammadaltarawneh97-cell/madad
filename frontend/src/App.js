@@ -57,6 +57,12 @@ import Contacts from './components/crm/Contacts';
 import Opportunities from './components/crm/Opportunities';
 import Cases from './components/crm/Cases';
 import Campaigns from './components/crm/Campaigns';
+import Tasks from './components/crm/Tasks';
+import Activities from './components/crm/Activities';
+import CRMProducts from './components/crm/CRMProducts';
+import Contracts from './components/crm/Contracts';
+import EmailTemplates from './components/crm/EmailTemplates';
+import Forecasting from './components/crm/Forecasting';
 
 // Import Warehouse components
 import WarehouseDashboard from './components/warehouse/WarehouseDashboard';
