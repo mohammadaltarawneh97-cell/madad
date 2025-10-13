@@ -1474,14 +1474,18 @@ backend:
           - GET /api/csv/export/stock-balance - Stock Balance
           
           All exports return downloadable CSV files with proper headers
+      - working: true
+        agent: "testing"
+        comment: |
+          ✅ CSV EXPORT VERIFIED: All accounting exports working correctly - Chart of Accounts (398 bytes), Vendors (156 bytes), Customers (162 bytes), Expense Claims (491 bytes). CRM exports (leads, contacts, opportunities, tasks) generating proper CSV files. Warehouse exports correctly denied for Accountant role (403 Forbidden) as expected. All CSV files have proper content-type headers and downloadable format.
 
   - task: "CSV Import for Key Modules"
     implemented: true
-    working: "NA"
+    working: true
     file: "backend/csv_routes.py"
     stuck_count: 0
     priority: "high"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
       - working: "NA"
         agent: "main"
@@ -1498,6 +1502,10 @@ backend:
           - Error tracking with row numbers
           - Bulk import with success/error reporting
           - Company-scoped imports
+      - working: true
+        agent: "testing"
+        comment: |
+          ✅ CSV IMPORT VERIFIED: Vendor import successful (2 records imported), Customer import successful (2 records imported). Leads and Products import correctly denied for Accountant role (403 Forbidden) as expected per RBAC permissions. Import functionality working with proper field mapping, automatic UUID generation, and company scoping. Error handling and success reporting working correctly.
 
   - task: "File & CSV Routes Integration"
     implemented: true
