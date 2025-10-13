@@ -257,6 +257,27 @@ function App() {
               </DashboardLayout>
             </ProtectedRoute>
           } />
+          <Route path="/accounting/bank-reconciliation" element={
+            <ProtectedRoute>
+              <DashboardLayout>
+                <BankReconciliation />
+              </DashboardLayout>
+            </ProtectedRoute>
+          } />
+          <Route path="/accounting/expense-claims" element={
+            <ProtectedRoute>
+              <DashboardLayout>
+                <ExpenseClaims />
+              </DashboardLayout>
+            </ProtectedRoute>
+          } />
+          <Route path="/accounting/budgets" element={
+            <ProtectedRoute>
+              <DashboardLayout>
+                <Budgets />
+              </DashboardLayout>
+            </ProtectedRoute>
+          } />
           
           {/* CRM Routes */}
           <Route path="/crm" element={
