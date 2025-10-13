@@ -102,7 +102,7 @@ async def create_task(
         task_number=task_number,
         assigned_to_name=assigned_to_name,
         assigned_by=current_user.id,
-        assigned_by_name=current_user.name,
+        assigned_by_name=current_user.full_name,
         related_to_name=related_to_name,
         **task.dict(),
         created_by=current_user.id,
