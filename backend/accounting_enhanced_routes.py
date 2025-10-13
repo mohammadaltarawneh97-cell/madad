@@ -234,6 +234,9 @@ async def create_bank_reconciliation(
     current_user: User = Depends(get_current_user)
 ):
     """Create a new bank reconciliation from a statement"""
+    if not current_user.has_permission("accounting", "write"):
+        raise HTTPException(status_code=403, detail="You don't have permission for this operation")
+    
     # Get statement
     statement = await db.bank_statements.find_one({
         "id": statement_id,
@@ -274,6 +277,9 @@ async def get_bank_reconciliations(
     current_user: User = Depends(get_current_user)
 ):
     """Get all bank reconciliations"""
+    if not current_user.has_permission("accounting", "read"):
+        raise HTTPException(status_code=403, detail="You don't have permission for this operation")
+    
     query = {"company_id": current_user.company_id}
     if bank_account_id:
         query["bank_account_id"] = bank_account_id
@@ -289,6 +295,9 @@ async def complete_reconciliation(
     current_user: User = Depends(get_current_user)
 ):
     """Mark reconciliation as complete"""
+    if not current_user.has_permission("accounting", "approve"):
+        raise HTTPException(status_code=403, detail="You don't have permission for this operation")
+    
     result = await db.bank_reconciliations.update_one(
         {"id": recon_id, "company_id": current_user.company_id},
         {
