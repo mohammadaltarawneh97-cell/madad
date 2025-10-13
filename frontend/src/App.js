@@ -46,6 +46,15 @@ import ARInvoices from './components/accounting/ARInvoices';
 import FixedAssets from './components/accounting/FixedAssets';
 import FinancialReports from './components/accounting/FinancialReports';
 
+// Import CRM components
+import CRMDashboard from './components/crm/CRMDashboard';
+import Leads from './components/crm/Leads';
+import Accounts from './components/crm/Accounts';
+import Contacts from './components/crm/Contacts';
+import Opportunities from './components/crm/Opportunities';
+import Cases from './components/crm/Cases';
+import Campaigns from './components/crm/Campaigns';
+
 // Role-based Dashboard Component
 const RoleDashboard = () => {
   const { userRole } = useApp();
