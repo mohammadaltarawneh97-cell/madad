@@ -555,7 +555,7 @@ async def create_forecast(
     if forecast.owner_id:
         owner = await db.users.find_one({"id": forecast.owner_id})
         if owner:
-            owner_name = owner.get('name')
+            owner_name = owner.get('full_name')
     
     forecast_data = SalesForecast(
         id=str(uuid.uuid4()),
