@@ -335,6 +335,48 @@ function App() {
               </DashboardLayout>
             </ProtectedRoute>
           } />
+          <Route path="/crm/tasks" element={
+            <ProtectedRoute>
+              <DashboardLayout>
+                <Tasks />
+              </DashboardLayout>
+            </ProtectedRoute>
+          } />
+          <Route path="/crm/activities" element={
+            <ProtectedRoute>
+              <DashboardLayout>
+                <Activities />
+              </DashboardLayout>
+            </ProtectedRoute>
+          } />
+          <Route path="/crm/products" element={
+            <ProtectedRoute>
+              <DashboardLayout>
+                <CRMProducts />
+              </DashboardLayout>
+            </ProtectedRoute>
+          } />
+          <Route path="/crm/contracts" element={
+            <ProtectedRoute>
+              <DashboardLayout>
+                <Contracts />
+              </DashboardLayout>
+            </ProtectedRoute>
+          } />
+          <Route path="/crm/email-templates" element={
+            <ProtectedRoute>
+              <DashboardLayout>
+                <EmailTemplates />
+              </DashboardLayout>
+            </ProtectedRoute>
+          } />
+          <Route path="/crm/forecasting" element={
+            <ProtectedRoute>
+              <DashboardLayout>
+                <Forecasting />
+              </DashboardLayout>
+            </ProtectedRoute>
+          } />
           
           {/* Warehouse Routes */}
           <Route path="/warehouse" element={
