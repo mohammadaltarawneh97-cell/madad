@@ -1718,6 +1718,20 @@ class ComprehensiveAPITester:
         self.test_enhanced_accounting_budgets()
         self.test_enhanced_accounting_rbac_permissions()
         
+        # Run Phase 2 Enhanced CRM Features tests
+        print("\n" + "🎯" * 50)
+        print("PHASE 2: ENHANCED CRM FEATURES TESTING")
+        print("🎯" * 50)
+        
+        self.test_crm_tasks()
+        self.test_crm_activities()
+        self.test_crm_products()
+        self.test_crm_contracts()
+        self.test_crm_email_templates()
+        self.test_crm_emails()
+        self.test_crm_forecasts()
+        self.test_crm_rbac_permissions()
+        
         # Run remaining RBAC tests
         print("\n" + "🔐" * 50)
         print("RBAC SYSTEM TESTING")
