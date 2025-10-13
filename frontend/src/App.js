@@ -45,6 +45,9 @@ import Customers from './components/accounting/Customers';
 import ARInvoices from './components/accounting/ARInvoices';
 import FixedAssets from './components/accounting/FixedAssets';
 import FinancialReports from './components/accounting/FinancialReports';
+import BankReconciliation from './components/accounting/BankReconciliation';
+import ExpenseClaims from './components/accounting/ExpenseClaims';
+import Budgets from './components/accounting/Budgets';
 
 // Import CRM components
 import CRMDashboard from './components/crm/CRMDashboard';
