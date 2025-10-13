@@ -1675,6 +1675,300 @@ class ComprehensiveAPITester:
             else:
                 self.log_result("Accountant Denied CRM Task Creation", False, "Accountant should be denied write access")
 
+    def test_file_upload_download(self):
+        """Test File Upload and Download functionality"""
+        print("\n📁 Testing File Upload & Download...")
+        
+        if "owner_ali" not in self.user_tokens:
+            self.log_result("File Upload - No Token", False, "owner_ali not authenticated")
+            return None
+        
+        token = self.user_tokens["owner_ali"]
+        
+        # Create a test file content
+        test_file_content = "This is a test file for upload functionality.\nLine 2 of test content."
+        test_filename = "test_document.txt"
+        
+        # Prepare multipart form data for file upload
+        files = {
+            'file': (test_filename, test_file_content, 'text/plain')
+        }
+        data = {
+            'related_to_type': 'expense_claim',
+            'related_to_id': 'test-claim-001'
+        }
+        
+        # Upload file
+        url = f"{self.api_url}/files/upload"
+        headers = {'Authorization': f'Bearer {token}'}
+        
+        try:
+            import requests
+            response = requests.post(url, files=files, data=data, headers=headers, timeout=10)
+            
+            if response.status_code == 200:
+                upload_data = response.json()
+                file_id = upload_data.get('file_id')
+                filename = upload_data.get('filename')
+                file_size = upload_data.get('file_size')
+                
+                self.log_result("File Upload", True, f"File '{filename}' uploaded, ID: {file_id}, Size: {file_size}")
+                
+                # Test file listing
+                success, list_data = self.make_request('GET', 'files/', token=token)
+                if success:
+                    files_count = len(list_data)
+                    self.log_result("File Listing", True, f"Retrieved {files_count} files")
+                else:
+                    self.log_result("File Listing", False, list_data.get('error', ''))
+                
+                # Test file metadata retrieval
+                if file_id:
+                    success, meta_data = self.make_request('GET', f'files/{file_id}', token=token)
+                    if success:
+                        original_filename = meta_data.get('original_filename')
+                        self.log_result("File Metadata", True, f"Retrieved metadata for: {original_filename}")
+                    else:
+                        self.log_result("File Metadata", False, meta_data.get('error', ''))
+                    
+                    # Test file download
+                    download_url = f"{self.api_url}/files/{file_id}/download"
+                    download_response = requests.get(download_url, headers=headers, timeout=10)
+                    
+                    if download_response.status_code == 200:
+                        downloaded_content = download_response.text
+                        content_match = downloaded_content.strip() == test_file_content.strip()
+                        self.log_result("File Download", content_match, 
+                                       "Downloaded content matches uploaded content" if content_match 
+                                       else "Content mismatch")
+                    else:
+                        self.log_result("File Download", False, f"Download failed: {download_response.status_code}")
+                    
+                    # Test file deletion (soft delete)
+                    success, delete_data = self.make_request('DELETE', f'files/{file_id}', token=token)
+                    if success:
+                        self.log_result("File Deletion", True, "File marked as deleted")
+                    else:
+                        self.log_result("File Deletion", False, delete_data.get('error', ''))
+                
+                return file_id
+            else:
+                self.log_result("File Upload", False, f"Upload failed: {response.status_code} - {response.text}")
+                return None
+                
+        except Exception as e:
+            self.log_result("File Upload", False, f"Upload error: {str(e)}")
+            return None
+
+    def test_csv_export_endpoints(self):
+        """Test CSV Export functionality"""
+        print("\n📊 Testing CSV Export Endpoints...")
+        
+        if "accountant_fatima" not in self.user_tokens:
+            self.log_result("CSV Export - No Token", False, "accountant_fatima not authenticated")
+            return
+        
+        token = self.user_tokens["accountant_fatima"]
+        
+        # Test accounting exports
+        accounting_exports = [
+            ('accounts', 'Chart of Accounts'),
+            ('vendors', 'Vendors'),
+            ('customers', 'Customers'),
+            ('expense-claims', 'Expense Claims')
+        ]
+        
+        for endpoint, description in accounting_exports:
+            url = f"{self.api_url}/csv/export/{endpoint}"
+            headers = {'Authorization': f'Bearer {token}'}
+            
+            try:
+                import requests
+                response = requests.get(url, headers=headers, timeout=10)
+                
+                if response.status_code == 200:
+                    content_type = response.headers.get('content-type', '')
+                    is_csv = 'text/csv' in content_type
+                    has_content = len(response.content) > 0
+                    
+                    self.log_result(f"CSV Export {description}", is_csv and has_content,
+                                   f"CSV file generated, Size: {len(response.content)} bytes" if is_csv and has_content
+                                   else f"Invalid response: {content_type}")
+                else:
+                    self.log_result(f"CSV Export {description}", False, 
+                                   f"Export failed: {response.status_code}")
+            except Exception as e:
+                self.log_result(f"CSV Export {description}", False, f"Export error: {str(e)}")
+        
+        # Test CRM exports (if user has permissions)
+        crm_exports = [
+            ('leads', 'Leads'),
+            ('contacts', 'Contacts'),
+            ('opportunities', 'Opportunities'),
+            ('tasks', 'Tasks')
+        ]
+        
+        for endpoint, description in crm_exports:
+            url = f"{self.api_url}/csv/export/{endpoint}"
+            headers = {'Authorization': f'Bearer {token}'}
+            
+            try:
+                response = requests.get(url, headers=headers, timeout=10)
+                
+                if response.status_code == 200:
+                    content_type = response.headers.get('content-type', '')
+                    is_csv = 'text/csv' in content_type
+                    self.log_result(f"CSV Export {description}", is_csv,
+                                   f"CSV file generated" if is_csv else f"Invalid content type: {content_type}")
+                elif response.status_code == 403:
+                    self.log_result(f"CSV Export {description}", True, "Correctly denied access (403)")
+                else:
+                    self.log_result(f"CSV Export {description}", False, 
+                                   f"Unexpected status: {response.status_code}")
+            except Exception as e:
+                self.log_result(f"CSV Export {description}", False, f"Export error: {str(e)}")
+        
+        # Test warehouse exports
+        warehouse_exports = [
+            ('products', 'Products'),
+            ('stock-balance', 'Stock Balance')
+        ]
+        
+        for endpoint, description in warehouse_exports:
+            url = f"{self.api_url}/csv/export/{endpoint}"
+            headers = {'Authorization': f'Bearer {token}'}
+            
+            try:
+                response = requests.get(url, headers=headers, timeout=10)
+                
+                if response.status_code == 200:
+                    content_type = response.headers.get('content-type', '')
+                    is_csv = 'text/csv' in content_type
+                    self.log_result(f"CSV Export {description}", is_csv,
+                                   f"CSV file generated" if is_csv else f"Invalid content type: {content_type}")
+                elif response.status_code == 403:
+                    self.log_result(f"CSV Export {description}", True, "Correctly denied access (403)")
+                else:
+                    self.log_result(f"CSV Export {description}", False, 
+                                   f"Unexpected status: {response.status_code}")
+            except Exception as e:
+                self.log_result(f"CSV Export {description}", False, f"Export error: {str(e)}")
+
+    def test_csv_import_endpoints(self):
+        """Test CSV Import functionality"""
+        print("\n📥 Testing CSV Import Endpoints...")
+        
+        if "accountant_fatima" not in self.user_tokens:
+            self.log_result("CSV Import - No Token", False, "accountant_fatima not authenticated")
+            return
+        
+        token = self.user_tokens["accountant_fatima"]
+        
+        # Test vendor import
+        vendor_csv_content = """vendor_code,vendor_name,email,phone
+V002,Test Vendor Import,vendor@test.com,+966501234567
+V003,Another Vendor,vendor2@test.com,+966501234568"""
+        
+        self._test_csv_import('vendors', 'Vendors', vendor_csv_content, token)
+        
+        # Test customer import
+        customer_csv_content = """customer_code,customer_name,email,phone
+C002,Test Customer Import,customer@test.com,+966501234569
+C003,Another Customer,customer2@test.com,+966501234570"""
+        
+        self._test_csv_import('customers', 'Customers', customer_csv_content, token)
+        
+        # Test leads import
+        leads_csv_content = """name,company,email,phone,lead_source,status
+John Doe,ABC Company,john@abc.com,+966501234571,website,new
+Jane Smith,XYZ Corp,jane@xyz.com,+966501234572,referral,qualified"""
+        
+        self._test_csv_import('leads', 'Leads', leads_csv_content, token)
+        
+        # Test products import
+        products_csv_content = """sku,name,category,unit_price,cost_price
+PROD-002,Test Product Import,electronics,1000.00,800.00
+PROD-003,Another Product,furniture,500.00,400.00"""
+        
+        self._test_csv_import('products', 'Products', products_csv_content, token)
+
+    def _test_csv_import(self, endpoint: str, description: str, csv_content: str, token: str):
+        """Helper method to test CSV import"""
+        url = f"{self.api_url}/csv/import/{endpoint}"
+        headers = {'Authorization': f'Bearer {token}'}
+        
+        files = {
+            'file': (f'{endpoint}.csv', csv_content, 'text/csv')
+        }
+        
+        try:
+            import requests
+            response = requests.post(url, files=files, headers=headers, timeout=10)
+            
+            if response.status_code == 200:
+                result = response.json()
+                success = result.get('success', False)
+                imported_count = result.get('imported_count', 0)
+                errors = result.get('errors', [])
+                
+                if success and imported_count > 0:
+                    self.log_result(f"CSV Import {description}", True, 
+                                   f"Imported {imported_count} records successfully")
+                else:
+                    error_msg = f"Import failed: {errors}" if errors else "No records imported"
+                    self.log_result(f"CSV Import {description}", False, error_msg)
+            elif response.status_code == 403:
+                self.log_result(f"CSV Import {description}", True, "Correctly denied access (403)")
+            else:
+                self.log_result(f"CSV Import {description}", False, 
+                               f"Import failed: {response.status_code} - {response.text}")
+        except Exception as e:
+            self.log_result(f"CSV Import {description}", False, f"Import error: {str(e)}")
+
+    def test_file_csv_rbac_permissions(self):
+        """Test RBAC permissions for file and CSV operations"""
+        print("\n🔐 Testing File & CSV RBAC Permissions...")
+        
+        # Test with different roles
+        test_cases = [
+            ("owner_ali", "Owner", True),
+            ("accountant_fatima", "Accountant", True),
+            ("manager_mohammad", "Manager", True),
+            ("driver_khalid", "Driver", False)  # Should be denied
+        ]
+        
+        for username, role_name, should_have_access in test_cases:
+            if username not in self.user_tokens:
+                continue
+            
+            token = self.user_tokens[username]
+            
+            # Test file listing access
+            success, data = self.make_request('GET', 'files/', 
+                                            expected_status=200 if should_have_access else 403, 
+                                            token=token)
+            
+            if should_have_access:
+                result_msg = "✓ Has file access" if success else f"✗ Should have access: {data.get('error', '')}"
+            else:
+                result_msg = "✓ Correctly denied file access" if success else f"✗ Should be denied access"
+            
+            self.log_result(f"File Access - {role_name}", 
+                           success if should_have_access else success, result_msg)
+            
+            # Test CSV export access (accounting)
+            success, data = self.make_request('GET', 'csv/export/accounts',
+                                            expected_status=200 if should_have_access else 403,
+                                            token=token)
+            
+            if should_have_access:
+                result_msg = "✓ Has CSV export access" if success else f"✗ Should have access: {data.get('error', '')}"
+            else:
+                result_msg = "✓ Correctly denied CSV access" if success else f"✗ Should be denied access"
+            
+            self.log_result(f"CSV Export Access - {role_name}", 
+                           success if should_have_access else success, result_msg)
+
     def run_all_tests(self):
         """Run comprehensive test suite including RBAC, Accounting, and CRM"""
         print("🚀 Starting Comprehensive Backend API Testing for Khairat Al Ardh Operations Management System")
