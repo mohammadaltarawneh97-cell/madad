@@ -1412,6 +1412,245 @@ agent_communication:
          - Bank Reconciliation: Creation and completion workflow functional
          - Multi-currency support and account types (checking, savings, etc.) working
       
+
+
+# ============================================================================
+# FILE UPLOAD & CSV IMPORT/EXPORT IMPLEMENTATION
+# ============================================================================
+
+backend:
+  - task: "File Upload/Download with MinIO"
+    implemented: true
+    working: "NA"
+    file: "backend/file_routes.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: |
+          Created comprehensive file management system:
+          - MinIO integration for self-hosted file storage
+          - File upload endpoint (POST /api/files/upload)
+          - File download endpoint (GET /api/files/{file_id}/download)
+          - File listing with filtering (GET /api/files/)
+          - File metadata storage in MongoDB
+          - Soft delete functionality
+          - Related entity linking (expense_claim, contract, etc.)
+          - Fallback to local filesystem if MinIO unavailable
+          - Company-scoped file access
+
+  - task: "CSV Export for All Modules"
+    implemented: true
+    working: "NA"
+    file: "backend/csv_routes.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: |
+          Created comprehensive CSV export system for:
+          **Accounting Module:**
+          - GET /api/csv/export/accounts - Chart of Accounts
+          - GET /api/csv/export/vendors - Vendors
+          - GET /api/csv/export/customers - Customers
+          - GET /api/csv/export/expense-claims - Expense Claims
+          
+          **CRM Module:**
+          - GET /api/csv/export/leads - Leads
+          - GET /api/csv/export/contacts - Contacts
+          - GET /api/csv/export/opportunities - Opportunities
+          - GET /api/csv/export/tasks - Tasks
+          
+          **Warehouse Module:**
+          - GET /api/csv/export/products - Products
+          - GET /api/csv/export/stock-balance - Stock Balance
+          
+          All exports return downloadable CSV files with proper headers
+
+  - task: "CSV Import for Key Modules"
+    implemented: true
+    working: "NA"
+    file: "backend/csv_routes.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: |
+          Created CSV import system with automatic field mapping:
+          - POST /api/csv/import/vendors - Import Vendors
+          - POST /api/csv/import/customers - Import Customers
+          - POST /api/csv/import/leads - Import Leads
+          - POST /api/csv/import/products - Import Products
+          
+          Features:
+          - Automatic UUID generation
+          - Field type conversion (numeric, text)
+          - Error tracking with row numbers
+          - Bulk import with success/error reporting
+          - Company-scoped imports
+
+  - task: "File & CSV Routes Integration"
+    implemented: true
+    working: true
+    file: "backend/server.py, backend/.env"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "main"
+        comment: |
+          Integrated file_routes.py and csv_routes.py into server.py.
+          Added MinIO environment variables to .env:
+          - MINIO_ENDPOINT=localhost:9000
+          - MINIO_ACCESS_KEY=minioadmin
+          - MINIO_SECRET_KEY=minioadmin
+          - MINIO_BUCKET=khairit-files
+          Installed minio Python package.
+          Backend started successfully.
+
+frontend:
+  - task: "File Upload Component"
+    implemented: true
+    working: "NA"
+    file: "frontend/src/components/common/FileUpload.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: |
+          Created reusable file upload component:
+          - File selection with size display
+          - Upload progress indication
+          - Related entity linking support
+          - Success callback for parent components
+          - Full Arabic RTL layout
+          - Can be used in any module (expense claims, contracts, etc.)
+
+  - task: "CSV Export Component"
+    implemented: true
+    working: "NA"
+    file: "frontend/src/components/common/CSVExport.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: |
+          Created reusable CSV export button component:
+          - One-click CSV download
+          - Automatic filename with date
+          - Success/error notifications
+          - SVG download icon
+          - Can be integrated into any list page
+
+  - task: "CSV Import Component"
+    implemented: true
+    working: "NA"
+    file: "frontend/src/components/common/CSVImport.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: |
+          Created reusable CSV import component:
+          - CSV file selection with validation
+          - Import progress indication
+          - Success/error reporting with counts
+          - Column header requirement notice
+          - Success callback for data refresh
+          - Full Arabic RTL layout
+
+metadata:
+  created_by: "main_agent"
+  version: "5.0"
+  test_sequence: 4
+  run_ui: false
+
+test_plan:
+  current_focus:
+    - "File Upload/Download with MinIO integration"
+    - "CSV Import/Export for Accounting, CRM, Warehouse"
+    - "Backend API testing for file and CSV operations"
+  stuck_tasks: []
+  test_all: false
+  test_priority: "high_first"
+
+agent_communication:
+  - agent: "main"
+    message: |
+      **FILE UPLOAD & CSV IMPORT/EXPORT - IMPLEMENTATION COMPLETE! ✅**
+      
+      **What Has Been Implemented:**
+      
+      **Backend APIs:**
+      1. **File Management Module** (file_routes.py)
+         - File Upload: POST /api/files/upload
+         - File Download: GET /api/files/{file_id}/download
+         - File Listing: GET /api/files/
+         - File Metadata: GET /api/files/{file_id}
+         - File Delete: DELETE /api/files/{file_id}
+         - MinIO integration with local fallback
+         - Company-scoped file access
+         - Related entity linking
+      
+      2. **CSV Export Module** (csv_routes.py)
+         - 10 export endpoints covering Accounting, CRM, Warehouse
+         - Downloadable CSV files with proper headers
+         - Field-specific data formatting
+         - Permission-based access control
+      
+      3. **CSV Import Module** (csv_routes.py)
+         - 4 import endpoints (Vendors, Customers, Leads, Products)
+         - Automatic field mapping
+         - Error tracking and reporting
+         - Bulk data import
+      
+      **Frontend Components:**
+      1. **FileUpload.js** - Reusable file upload component with progress
+      2. **CSVExport.js** - One-click CSV export button
+      3. **CSVImport.js** - CSV import with validation and error reporting
+      
+      **Technical Features:**
+      - MinIO self-hosted file storage
+      - Local filesystem fallback
+      - File metadata in MongoDB
+      - Soft delete for files
+      - CSV parsing and generation
+      - Automatic field type conversion
+      - Bulk operations with error tracking
+      - All components with Arabic RTL layout
+      
+      **Files Created:**
+      - Backend: file_routes.py, csv_routes.py
+      - Frontend: 3 common components (FileUpload, CSVExport, CSVImport)
+      - Modified: server.py, .env, requirements.txt
+      
+      **Dependencies Added:**
+      - minio==7.2.18
+      - argon2-cffi, pycryptodome (MinIO dependencies)
+      
+      **Services Status:**
+      - Backend: RUNNING ✅
+      - Frontend: RUNNING ✅
+      
+      **Ready for Testing:**
+      - File upload/download testing
+      - CSV export testing for all modules
+      - CSV import testing with sample data
+      - MinIO connection testing
+
       **2. Expense Claims Module** ✅ WORKING
          - Expense Claims: Create/Read/Submit/Approve workflow complete
          - Automatic claim numbering (EXP-000001) working
