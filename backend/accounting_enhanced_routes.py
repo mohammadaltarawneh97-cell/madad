@@ -175,6 +175,9 @@ async def create_bank_statement(
     current_user: User = Depends(get_current_user)
 ):
     """Upload a new bank statement"""
+    if not current_user.has_permission("accounting", "write"):
+        raise HTTPException(status_code=403, detail="You don't have permission to create bank statements")
+    
     # Get bank account
     bank_account = await db.bank_accounts.find_one({
         "id": statement.bank_account_id,
@@ -209,6 +212,9 @@ async def get_bank_statements(
     current_user: User = Depends(get_current_user)
 ):
     """Get all bank statements for the company"""
+    if not current_user.has_permission("accounting", "read"):
+        raise HTTPException(status_code=403, detail="You don't have permission to view bank statements")
+    
     query = {"company_id": current_user.company_id}
     if bank_account_id:
         query["bank_account_id"] = bank_account_id
