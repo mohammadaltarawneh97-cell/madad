@@ -2402,7 +2402,8 @@ def main():
     tester = ComprehensiveAPITester()
     
     try:
-        success = tester.run_all_tests()
+        # Run the comprehensive ERP test as requested
+        success = tester.run_comprehensive_erp_test()
         return 0 if success else 1
     except Exception as e:
         print(f"\n💥 CRITICAL ERROR: {str(e)}")
