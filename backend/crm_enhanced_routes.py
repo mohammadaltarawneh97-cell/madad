@@ -173,7 +173,7 @@ async def complete_task(
         raise HTTPException(status_code=403, detail="You don't have permission to update tasks")
     
     result = await db.tasks.update_one(
-        {"id": task_id, "company_id": current_user.company_id},
+        {"id": task_id, "company_id": current_user.current_company_id},
         {
             "$set": {
                 "status": TaskStatus.COMPLETED.value,
